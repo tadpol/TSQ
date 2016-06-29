@@ -18,8 +18,30 @@ function TSQ.q(...)
 	return ts
 end
 
-function TSQ:from(table)
-	self._from = table
+function TSQ:from(...)
+	if type(self._from) ~= "table" then
+		local ft = {}
+		local ftm = {}
+		ftm.__tostring = function(v)
+			return table.concat(v, ',')
+		end
+		setmetatable(ft, ftm)
+		self._from = ft
+	end
+	local tbl = {}
+	if select('#', ...) == 1 then
+		local v = select(1, ...)
+		if type(v) == "table" then
+			tbl = v
+		else
+			tbl[1] = tostring(v)
+		end
+	else
+		tbl = table.pack(...)
+	end
+	for i,v in ipairs(tbl) do
+		self._from[#self._from + 1] = '"' .. tostring(v) .. '"'
+	end
 	return self
 end
 
@@ -179,6 +201,7 @@ end
 
 function TSQ.enquote_id(value)
 	-- https://docs.influxdata.com/influxdb/v0.13/troubleshooting/frequently_encountered_issues/#single-quoting-and-double-quoting-in-queries
+	-- XXX too many special cases to have this be this generic.
 	--[[
 	-- Double quote identifiers if they start with a digit, contain characters other
 	-- than [A-z,0-9,_], or if they are an InfluxQL keyword. You can double quote
@@ -204,8 +227,7 @@ function TSQ:__tostring()
 		s = s .. ' INTO ' .. tostring(self._into)
 	end
 
-	s = s .. ' FROM '
-	s = s .. self.enquote_id(self._from)
+	s = s .. ' FROM '.. tostring(self._from)
 	
 	-- where
 	if type(self._where) == "table" then
