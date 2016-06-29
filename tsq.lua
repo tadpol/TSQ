@@ -6,6 +6,32 @@ TSQ.__index = TSQ
 TSQ._sel = '*'
 TSQ._from = '*'
 
+--[[ Quoting Rules:
+-- https://docs.influxdata.com/influxdb/v0.13/troubleshooting/frequently_encountered_issues/#single-quoting-and-double-quoting-in-queries
+--
+-- Single quote string values (for example, tag values) but do not single quote
+-- identifiers (database names, retention policy names, user names, measurement
+-- names, tag keys, and field keys).
+-- 
+-- Double quote identifiers if they start with a digit, contain characters
+-- other than [A-z,0-9,_], or if they are an InfluxQL keyword. You can double
+-- quote identifiers even if they don’t fall into one of those categories but
+-- it isn’t necessary.
+-- 
+-- Examples: 
+-- 	Yes: SELECT bikes_available FROM bikes WHERE station_id='9'
+-- 	Yes: SELECT "bikes_available" FROM "bikes" WHERE "station_id"='9'
+-- 	Yes: SELECT * from "cr@zy" where "p^e"='2'
+-- 	No: SELECT 'bikes_available' FROM 'bikes' WHERE 'station_id'="9"
+-- 	No: SELECT * from cr@zy where p^e='2'
+--
+-- 	Single quote date time strings. InfluxDB returns an error (ERR: invalid operation: time and *influxql.VarRef are not compatible) if you double quote a date time string.
+--
+-- 	Examples:
+-- 	 Yes: SELECT water_level FROM h2o_feet WHERE time > '2015-08-18T23:00:01.232000000Z' AND time < '2015-09-19'
+-- 	 No: SELECT water_level FROM h2o_feet WHERE time > "2015-08-18T23:00:01.232000000Z" AND time < "2015-09-19"
+--
+--]]
 
 function TSQ.q()
 	local ts = {}
@@ -234,26 +260,6 @@ function TSQ:OR(a, op, b)
 	-- ORs push onto an array that is at the end of self.where
 
 	return self
-end
-
-function TSQ.enquote_id(value)
-	-- https://docs.influxdata.com/influxdb/v0.13/troubleshooting/frequently_encountered_issues/#single-quoting-and-double-quoting-in-queries
-	-- XXX too many special cases to have this be this generic.
-	--[[
-	-- Double quote identifiers if they start with a digit, contain characters other
-	-- than [A-z,0-9,_], or if they are an InfluxQL keyword. You can double quote
-	-- identifiers even if they don’t fall into one of those categories but it isn’t
-	-- necessary.
-	--]]
-	if type(value) == "table" then
-		local w = {}
-		for i,v in ipairs(value) do
-			w[#w + 1] = '"' .. tostring(v) .. '"'
-		end
-		return table.concat(w, ',')
-	else
-		return '"' .. tostring(value) .. '"'
-	end
 end
 
 function TSQ:__tostring()
