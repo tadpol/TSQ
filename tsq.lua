@@ -310,14 +310,11 @@ function TSQ:__tostring()
 		end
 	end
 
-	-- limit ???XXX Does this require to also have GROUP BY???
-	if type(self._limit) == "string" or type(self._limit) == "number" then
-		s = s .. ' LIMIT ' .. tostring(self._limit)
 	end
 
 	-- slimit ???XXX Does this require to also have GROUP BY???
-	if type(self._slimit) == "string" or type(self._slimit) == "number" then
-		s = s .. ' SLIMIT ' .. tostring(self._slimit)
+	if type(self._limit) == "string" or type(self._limit) == "number" then
+		s = s .. ' LIMIT ' .. tostring(self._limit)
 	end
 
 	-- offset
@@ -326,6 +323,10 @@ function TSQ:__tostring()
 	end
 
 	-- soffset
+	if type(self._slimit) == "string" or type(self._slimit) == "number" then
+		s = s .. ' SLIMIT ' .. tostring(self._slimit)
+	end
+
 	if type(self._soffset) == "string" or type(self._soffset) == "number" then
 		s = s .. ' SOFFSET ' .. tostring(self._soffset)
 	end
