@@ -7,15 +7,38 @@ TSQ._sel = '*'
 TSQ._from = '*'
 
 
-function TSQ.q(...)
+function TSQ.q()
 	local ts = {}
 	setmetatable(ts, TSQ)
 
-	if select('#', ...) > 0 then
-		ts._sel = table.pack(...)
-	end
-
 	return ts
+end
+
+function TSQ:fields(...)
+	if type(self._sel) ~= "table" then
+		local ft = {}
+		local ftm = {}
+		ftm.__tostring = function(v)
+			return table.concat(v, ',')
+		end
+		setmetatable(ft, ftm)
+		self._sel = ft
+	end
+	local tbl = {}
+	if select('#', ...) == 1 then
+		local v = select(1, ...)
+		if type(v) == "table" then
+			tbl = v
+		else
+			tbl[1] = tostring(v)
+		end
+	else
+		tbl = table.pack(...)
+	end
+	for i,v in ipairs(tbl) do -- FIXME Needs to be smarter since can be expr.
+		self._sel[#self._sel + 1] = '"' .. tostring(v) .. '"'
+	end
+	return self
 end
 
 function TSQ:from(...)
@@ -235,7 +258,7 @@ end
 
 function TSQ:__tostring()
 	local s = 'SELECT '
-	s = s .. self.enquote_id(self._sel) -- FIXME Needs to be smarter since can be expr.
+	s = s .. tostring(self._sel)
 
 	if type(self._into) == "string" then
 		s = s .. ' INTO ' .. tostring(self._into)
