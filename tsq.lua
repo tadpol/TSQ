@@ -136,7 +136,7 @@ function TSQ:OR(...) -- FIXME change to A, op, B; and validate params
 	return self
 end
 
-function enquote_id(value)
+function TSQ.enquote_id(value)
 	-- https://docs.influxdata.com/influxdb/v0.13/troubleshooting/frequently_encountered_issues/#single-quoting-and-double-quoting-in-queries
 	--[[
 	-- Double quote identifiers if they start with a digit, contain characters other
@@ -157,14 +157,14 @@ end
 
 function TSQ:__tostring()
 	local s = 'SELECT '
-	s = s .. enquote_id(self._sel)
+	s = s .. self.enquote_id(self._sel)
 
 	if type(self._into) == "string" then
 		s = s .. ' INTO ' .. tostring(self._into)
 	end
 
 	s = s .. ' FROM '
-	s = s .. enquote_id(self._from)
+	s = s .. self.enquote_id(self._from)
 	
 	-- where
 	if type(self._where) == "table" then
@@ -174,7 +174,7 @@ function TSQ:__tostring()
 	-- group by
 	if type(self._groupby) == "table" then
 		local tags = {}
-		tags[1] = enquote_id(self._groupby)
+		tags[1] = self.enquote_id(self._groupby)
 		if type(self._groupbytime) == "table" and #self._groupbytime > 0 then
 			local time = "time(" .. self._groupbytime[1]
 			if #self._groupbytime > 1 then
