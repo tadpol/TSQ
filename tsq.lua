@@ -1,3 +1,6 @@
+--[[
+--]]
+
 TSQ = {}
 TSQ.__index = TSQ
 TSQ._sel = '*'
@@ -85,12 +88,31 @@ function TSQ:fill(opt)
 	return self
 end
 
-function packageExpr(a, op, b)
--- binary_op = "+" | "-" | "*" | "/" | "AND" | "OR" | "=" | "!=" | "<>" | "<" | "<=" | ">" | ">=" .
+function TSQ.is_an_op(op)
+	local binary_op = {"+", "-", "*", "/", "AND", "OR", "=", "!=", "<>", "<", "<=", ">", ">="}
+	for i,v in ipairs(binary_op) do
+		if v == op then
+			return true
+		end
+	end
+	return false
 end
 
-function TSQ:where(...) -- FIXME change to A, op, B; and validate params
-	local exr = table.concat(table.pack(...), " ")
+function TSQ.packageExpr(a, op, b)
+	if a == nil or b == nil or op == nil then
+		return nil
+	end
+	if not TSQ.is_an_op(op) then
+		return nil
+	end
+	
+	-- FIXME quoting.
+
+	return tostring(a) .. ' ' .. op .. ' ' .. tostring(b)
+end
+
+function TSQ:where(a, op, b)
+	local exr = self.packageExpr(a, op, b)
 	if type(self._where) ~= "table" then
 		local andtbl = {}
 		local andmeta = {}
@@ -110,8 +132,8 @@ function TSQ:where(...) -- FIXME change to A, op, B; and validate params
 end
 TSQ.AND = TSQ.where
 
-function TSQ:OR(...) -- FIXME change to A, op, B; and validate params
-	local exr = table.concat(table.pack(...), " ")
+function TSQ:OR(a, op, b)
+	local exr = self.packageExpr(a, op, b)
 	local ortbl = {}
 	if type(self._where[#self._where]) ~= "table" then
 		-- convert last item into a table
