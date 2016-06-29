@@ -81,15 +81,29 @@ function TSQ:soffset(value)
 	return self
 end
 
-function TSQ:groupby(tag)
-	if type(self._groupby) ~= "table" then self._groupby = {} end
-	if type(tag) == "table" then
-		-- only copy the array parts
-		for i,v in ipairs(tag) do
-			self._groupby[#self._groupby + 1] = v
+function TSQ:groupby(...)
+	if type(self._groupby) ~= "table" then
+		local ft = {}
+		local ftm = {}
+		ftm.__tostring = function(v)
+			return table.concat(v, ',')
+		end
+		setmetatable(ft, ftm)
+		self._groupby = ft
+	end
+	local tbl = {}
+	if select('#', ...) == 1 then
+		local v = select(1, ...)
+		if type(v) == "table" then
+			tbl = v
+		else
+			tbl[1] = tostring(v)
 		end
 	else
-		self._groupby[#self._groupby + 1] = tag
+		tbl = table.pack(...)
+	end
+	for i,v in ipairs(tbl) do
+		self._groupby[#self._groupby + 1] = '"' .. tostring(v) .. '"'
 	end
 	return self
 end
@@ -237,7 +251,7 @@ function TSQ:__tostring()
 	-- group by
 	if type(self._groupby) == "table" then
 		local tags = {}
-		tags[1] = self.enquote_id(self._groupby)
+		tags[1] = tostring(self._groupby)
 		if type(self._groupbytime) == "table" and #self._groupbytime > 0 then
 			tags[#tags + 1] = tostring(self._groupbytime)
 		end
