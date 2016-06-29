@@ -73,7 +73,18 @@ function TSQ:groupby(tag)
 end
 
 function TSQ:groupbytime(time, offset)
-	self._groupbytime = {time, offset}
+	local gbt = {time, offset}
+	local gbtmeta = {}
+	gbtmeta.__tostring = function(v)
+		if #v <= 0 then return "" end
+		local time = "time( " .. tostring(v[1])
+		if #v > 1 then
+			time = time .. ", " .. tostring(v[2])
+		end
+		return time .. " )"
+	end
+	setmetatable(gbt, gbtmeta)
+	self._groupbytime = gbt
 	return self
 end
 
@@ -202,12 +213,7 @@ function TSQ:__tostring()
 		local tags = {}
 		tags[1] = self.enquote_id(self._groupby)
 		if type(self._groupbytime) == "table" and #self._groupbytime > 0 then
-			local time = "time(" .. self._groupbytime[1]
-			if #self._groupbytime > 1 then
-				time = time .. "," .. self._groupbytime[2]
-			end
-			time = time .. ")"
-			tags[#tags + 1] = time
+			tags[#tags + 1] = tostring(self._groupbytime)
 		end
 		s = s .. ' GROUP BY ' .. table.concat(tags, ",")
 		if self._fill ~= nil then
