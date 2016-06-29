@@ -310,6 +310,8 @@ function TSQ:__tostring()
 		end
 	end
 
+	if type(self._orderby) == "table" then
+		s = s .. ' ORDER BY ' .. tostring(self._orderby)
 	end
 
 	-- slimit ???XXX Does this require to also have GROUP BY???
