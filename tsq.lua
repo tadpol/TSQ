@@ -74,7 +74,7 @@ function TSQ:fields(...)
 		-- func(field)
 		-- AS name
 		local vs = tostring(v)
-		fn, fl = string.match(vs, "^(%a+)%((.*)%)$")
+		fn, fl = string.match(vs, "^(%a+)%((.*)%)$") -- might be to simplistic.
 		if fn ~= nil and fl ~= nil then
 			-- this is a function call on a field. 
 			-- Quote the field only
@@ -109,6 +109,7 @@ function TSQ:from(...)
 		tbl = table.pack(...)
 	end
 	for i,v in ipairs(tbl) do
+		-- FIXME if quotes or / already surround string, don't add quotes.
 		self._from[#self._from + 1] = '"' .. tostring(v) .. '"'
 	end
 	return self
@@ -292,12 +293,10 @@ function TSQ:__tostring()
 
 	s = s .. ' FROM '.. tostring(self._from)
 	
-	-- where
 	if type(self._where) == "table" then
 		s = s .. ' ' .. tostring(self._where)
 	end
 	
-	-- group by
 	if type(self._groupby) == "table" then
 		local tags = {}
 		tags[1] = tostring(self._groupby)
@@ -314,17 +313,14 @@ function TSQ:__tostring()
 		s = s .. ' ORDER BY ' .. tostring(self._orderby)
 	end
 
-	-- slimit ???XXX Does this require to also have GROUP BY???
 	if type(self._limit) == "string" or type(self._limit) == "number" then
 		s = s .. ' LIMIT ' .. tostring(self._limit)
 	end
 
-	-- offset
 	if type(self._offset) == "string" or type(self._offset) == "number" then
 		s = s .. ' OFFSET ' .. tostring(self._offset)
 	end
 
-	-- soffset
 	if type(self._slimit) == "string" or type(self._slimit) == "number" then
 		s = s .. ' SLIMIT ' .. tostring(self._slimit)
 	end
@@ -332,7 +328,6 @@ function TSQ:__tostring()
 	if type(self._soffset) == "string" or type(self._soffset) == "number" then
 		s = s .. ' SOFFSET ' .. tostring(self._soffset)
 	end
-
 
 	return s
 end
