@@ -7,9 +7,13 @@ TSQ._sel = '*'
 TSQ._from = '*'
 
 
-function TSQ.q()
+function TSQ.q(...)
 	local ts = {}
 	setmetatable(ts, TSQ)
+
+	if select('#', ...) > 0 then
+		ts._sel = table.pack(...)
+	end
 
 	return ts
 end
@@ -179,7 +183,7 @@ end
 
 function TSQ:__tostring()
 	local s = 'SELECT '
-	s = s .. self.enquote_id(self._sel)
+	s = s .. self.enquote_id(self._sel) -- FIXME Needs to be smarter since can be expr.
 
 	if type(self._into) == "string" then
 		s = s .. ' INTO ' .. tostring(self._into)
