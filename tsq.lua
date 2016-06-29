@@ -62,7 +62,18 @@ function TSQ:fields(...)
 		tbl = table.pack(...)
 	end
 	for i,v in ipairs(tbl) do -- FIXME Needs to be smarter since can be expr.
-		self._sel[#self._sel + 1] = '"' .. tostring(v) .. '"'
+		-- func(field)
+		-- AS name
+		local vs = tostring(v)
+		fn, fl = string.match(vs, "^(%a+)%((.*)%)$")
+		if fn ~= nil and fl ~= nil then
+			-- this is a function call on a field. 
+			-- Quote the field only
+			vs = fn .. '("' .. fl .. '")'
+		else
+			vs =  '"' .. vs .. '"'
+		end
+		self._sel[#self._sel + 1] = vs
 	end
 	return self
 end
