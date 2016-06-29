@@ -1,4 +1,13 @@
 --[[
+-- An abstraction to the InfluxDB Query language.  Specificly only SELECT statements.
+--
+-- InfluxDB is quiet picky about placement of spaces and quotes.  So this attempts
+-- to programically handle that by abstrating things a bit.  There will be some
+-- queries that won't work from here, but most should.
+--
+-- Because this is abstracted away from string concatenation a bit, it can also do
+-- some parameter validation.
+--
 --]]
 
 TSQ = {}
