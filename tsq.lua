@@ -100,6 +100,10 @@ function TSQ:fill(opt)
 	else
 		return nil
 	end
+	-- Added a fill, make sure there is a groupby
+	if self._groupby == nil then
+		self:groupby('*')
+	end
 	return self
 end
 
