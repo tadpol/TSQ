@@ -28,6 +28,27 @@ describe("Query generation", function()
 		assert.are.equal([[SELECT mean("af") FROM *]], s)
 	end)
 
+	it("Check the ways metrics can be from", function()
+		local q
+		q = TSQ.q():from('af')
+		assert.are.equal([[SELECT * FROM "af"]], tostring(q))
+
+		q = TSQ.q():from('af', 'bg', 'ce')
+		assert.are.equal([[SELECT * FROM "af","bg","ce"]], tostring(q))
+
+		q = TSQ.q():from({'af', 'bg', 'ce'})
+		assert.are.equal([[SELECT * FROM "af","bg","ce"]], tostring(q))
+
+		q = TSQ.q():from{'af', 'bg', 'ce'}
+		assert.are.equal([[SELECT * FROM "af","bg","ce"]], tostring(q))
+
+		q = TSQ.q():from('"af"')
+		assert.are.equal([[SELECT * FROM "af"]], tostring(q))
+
+		q = TSQ.q():from('/af/')
+		assert.are.equal([[SELECT * FROM /af/]], tostring(q))
+
+	end)
 
 
 	it("parts can be added across multiple lines.", function()

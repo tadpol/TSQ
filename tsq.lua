@@ -74,7 +74,7 @@ function TSQ:fields(...)
 		-- func(field)
 		-- AS name
 		local vs = tostring(v)
-		fn, fl = string.match(vs, "^(%a+)%((.*)%)$") -- might be to simplistic.
+		fn, fl = string.match(vs, "^(%a+)%((.*)%)$") -- might be too simplistic.
 		if fn ~= nil and fl ~= nil then
 			-- this is a function call on a field. 
 			-- Quote the field only
@@ -109,8 +109,14 @@ function TSQ:from(...)
 		tbl = table.pack(...)
 	end
 	for i,v in ipairs(tbl) do
-		-- FIXME if quotes or / already surround string, don't add quotes.
-		self._from[#self._from + 1] = '"' .. tostring(v) .. '"'
+		-- if quotes or / already surround string, don't add quotes.
+		local vs = tostring(v)
+		if (vs:sub(1,1) == '"' and vs:sub(-1,-1) == '"') or
+			(vs:sub(1,1) == '/' and vs:sub(-1,-1) == '/') then
+		else
+			vs = string.format('%q', vs)
+		end
+		self._from[#self._from + 1] = vs
 	end
 	return self
 end
@@ -173,7 +179,8 @@ function TSQ:groupby(...)
 		tbl = table.pack(...)
 	end
 	for i,v in ipairs(tbl) do
-		self._groupby[#self._groupby + 1] = '"' .. tostring(v) .. '"'
+		local vs = string.format('%q', tostring(v))
+		self._groupby[#self._groupby + 1] = vs
 	end
 	return self
 end
