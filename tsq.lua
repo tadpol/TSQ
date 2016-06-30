@@ -185,7 +185,28 @@ function TSQ:groupby(...)
 	return self
 end
 
+function TSQ.is_a_duration(value)
+	local vs = tostring(value)
+	local dig, units = string.match(vs, "^(%d+)([usmhdw]*)$")
+	if dig == nil then
+		return false
+	end
+	local allowed_units = {'u', 'ms', 's', 'm', 'h', 'd', 'w'}
+	for i,v in ipairs(allowed_units) do
+		if v == units then
+			return true
+		end
+	end
+	return false
+end
+
 function TSQ:groupbytime(time, offset)
+	if not TSQ.is_a_duration(time) then
+		return nil
+	end
+	if offset ~= nil and not TSQ.is_a_duration(offset) then
+		return nil
+	end
 	local gbt = {time, offset}
 	local gbtmeta = {}
 	gbtmeta.__tostring = function(v)
