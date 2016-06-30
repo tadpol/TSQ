@@ -294,7 +294,7 @@ function TSQ:__tostring()
 	s = s .. ' FROM '.. tostring(self._from)
 	
 	if type(self._where) == "table" then
-		s = s .. ' ' .. tostring(self._where)
+		s = s .. ' WHERE ' .. tostring(self._where)
 	end
 	
 	if type(self._groupby) == "table" then
