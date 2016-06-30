@@ -50,6 +50,37 @@ describe("Query generation", function()
 
 	end)
 
+	it("can have a limit and/or offset", function()
+		local q
+		q = TSQ.q():limit(10)
+		assert.are.equal([[SELECT * FROM * LIMIT 10]], tostring(q))
+
+		q = TSQ.q():offset(10)
+		assert.are.equal([[SELECT * FROM * OFFSET 10]], tostring(q))
+
+		q = TSQ.q():limit(10):offset(10)
+		assert.are.equal([[SELECT * FROM * LIMIT 10 OFFSET 10]], tostring(q))
+
+		q = TSQ.q():offset(10):limit(10)
+		assert.are.equal([[SELECT * FROM * LIMIT 10 OFFSET 10]], tostring(q))
+
+	end)
+
+	it("can have a slimit and/or soffset", function()
+		local q
+		q = TSQ.q():slimit(10)
+		assert.are.equal([[SELECT * FROM * SLIMIT 10]], tostring(q))
+
+		q = TSQ.q():soffset(10)
+		assert.are.equal([[SELECT * FROM * SOFFSET 10]], tostring(q))
+
+		q = TSQ.q():slimit(10):soffset(10)
+		assert.are.equal([[SELECT * FROM * SLIMIT 10 SOFFSET 10]], tostring(q))
+
+		q = TSQ.q():soffset(10):slimit(10)
+		assert.are.equal([[SELECT * FROM * SLIMIT 10 SOFFSET 10]], tostring(q))
+
+	end)
 
 	it("parts can be added across multiple lines.", function()
 		local q = TSQ.q()
