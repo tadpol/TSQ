@@ -366,7 +366,36 @@ end
 -- TODO Create a results iterrator function.
 -- reshape results to be a table for each row; keys are column names.
 --
+-- This works on ONE result that is returned.
 --]]
+function tsq_result_i(result)
+	local srs = result.series
+	if srs == nil then
+		return nil, nil, nil
+	end
+	local f = function(state, previous)
+		local res = {}
+		for i,v in ipairs(srs) do
+			state.curidx = state.curidx + 1
+			local values = srs[1].values
+			if state.curidx > #values then
+				res[i] = nil
+			else
+				local value = values[state.curidx]
+				local ret = {}
+				for i,v in ipairs(srs[1].columns) do
+					ret[v] = value[i]
+				end
+				res[i] = ret
+			end
+		end
+		-- Each series should return a table
+		return table.unpack(res)
+	end
+	local state = {curidx = 0}
+	local first = 0
+	return f, state, first
+end
 
 ---
 -- Dump a table as a string; recursively

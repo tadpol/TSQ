@@ -101,6 +101,7 @@ describe("Query generation", function()
 		local s
 		s = tostring(TSQ.q():groupbytime('13h'))
 		assert.are.equal([[SELECT * FROM * GROUP BY time( 13h )]], s)
+
 	end)
 
 	--------------------------------------------------------------
