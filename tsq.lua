@@ -24,8 +24,8 @@ TSQ._from = '*'
 -- 
 -- Double quote identifiers if they start with a digit, contain characters
 -- other than [A-z,0-9,_], or if they are an InfluxQL keyword. You can double
--- quote identifiers even if they don’t fall into one of those categories but
--- it isn’t necessary.
+-- quote identifiers even if they don't fall into one of those categories but
+-- it isn't necessary.
 -- 
 -- Examples: 
 -- 	Yes: SELECT bikes_available FROM bikes WHERE station_id='9'
