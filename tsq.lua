@@ -325,9 +325,11 @@ function TSQ:__tostring()
 		s = s .. ' WHERE ' .. tostring(self._where)
 	end
 	
-	if type(self._groupby) == "table" then
+	if type(self._groupby) == "table" or type(self._groupbytime) == "table" then
 		local tags = {}
-		tags[1] = tostring(self._groupby)
+		if type(self._groupby) == "table" then
+			tags[#tags + 1] = tostring(self._groupby)
+		end
 		if type(self._groupbytime) == "table" and #self._groupbytime > 0 then
 			tags[#tags + 1] = tostring(self._groupbytime)
 		end
