@@ -25,18 +25,26 @@ describe("Query generation", function()
 	it("checks that functions on fields", function()
 		local s
 		s = tostring(TSQ.q():fields('mean(af)'))
-		assert.are.equal(s, [[SELECT mean("af") FROM *]])
+		assert.are.equal([[SELECT mean("af") FROM *]], s)
 	end)
 
 
 
+	it("parts can be added across multiple lines.", function()
+		local q = TSQ.q()
+		q:from("bob")
+		q:fields("a")
+		s = tostring(q)
+		assert.are.equal([[SELECT "a" FROM "bob"]], s)
+	end)
 
-	it("a complex one.", function()
+	it("a complex one for a real query", function()
 		local s
 		s = TSQ.q():fields('MEAN(temp)'):from('wintd'):where('sn', '=', "'3'"):OR('sn', '=', "'5'"):AND('time','>','now() - 1h'):groupby('sn'):groupbytime('15m'):fill('prev'):limit(1)
 		r = [[SELECT MEAN("temp") FROM "wintd" WHERE ( sn = '3' OR sn = '5' ) AND time > now() - 1h GROUP BY "sn",time( 15m ) fill(previous) LIMIT 1]]
 		assert.are.equal(r, tostring(s))
 	end)
+
 end)
 
 -- vim: set ai sw=4 ts=4 :
