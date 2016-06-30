@@ -82,6 +82,22 @@ describe("Query generation", function()
 
 	end)
 
+	it("checks the ways that groupby can be specificed", function()
+		local s
+		s = tostring(TSQ.q():groupby('af'))
+		assert.are.equal([[SELECT * FROM * GROUP BY "af"]], s)
+
+		s = tostring(TSQ.q():groupby('af', 'gf', 'gh'))
+		assert.are.equal([[SELECT * FROM * GROUP BY "af","gf","gh"]], s)
+
+		s = tostring(TSQ.q():groupby({'af', 'gf', 'gh'}))
+		assert.are.equal([[SELECT * FROM * GROUP BY "af","gf","gh"]], s)
+
+		s = tostring(TSQ.q():groupby{'af', 'gf', 'gh'})
+		assert.are.equal([[SELECT * FROM * GROUP BY "af","gf","gh"]], s)
+	end)
+
+	--------------------------------------------------------------
 	it("parts can be added across multiple lines.", function()
 		local q = TSQ.q()
 		q:from("bob")
