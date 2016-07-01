@@ -120,6 +120,19 @@ describe("Query generation", function()
 		assert.are.equal(r, tostring(s))
 	end)
 
+	it("another real query to test.", function()
+		local sn = 5
+		local window = 30
+		local r =  "SELECT * FROM \"wintd\" WHERE sn = '" ..sn.."' AND time > now() - " .. window .. "m LIMIT 10000"
+		local qq = TSQ.q()
+		qq:from('wintd')
+		qq:where('sn', '=', "'"..sn.."'")
+		qq:AND('time', '>', "now() - " .. window .. "m")
+		qq:limit(10000)
+
+		assert.are.equal(r, tostring(qq))
+
+	end)
 end)
 
 -- vim: set ai sw=4 ts=4 :
