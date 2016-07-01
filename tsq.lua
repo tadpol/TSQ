@@ -363,6 +363,9 @@ function TSQ:__tostring()
 	return s
 end
 
+if _VERSION == "Lua 5.1" then
+	table.unpack = unpack
+end
 ------------------------------------------------------------------------------
 ---
 -- Return the next values in the series returned from Timeseries.
