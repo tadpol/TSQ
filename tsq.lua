@@ -124,8 +124,7 @@ end
 
 function TSQ:limit(value)
 	if type(value) ~= "number" then
-		-- FIXME do what? return nil? or a special 'failing' object?
-		return nil
+		error("limit ("..value..") is not a number")
 	end
 	self._limit = value
 	return self
@@ -133,8 +132,7 @@ end
 
 function TSQ:slimit(value)
 	if type(value) ~= "number" then
-		-- FIXME do what? return nil? or a special 'failing' object?
-		return nil
+		error("slimit ("..value..") is not a number")
 	end
 	self._slimit = value
 	return self
@@ -142,8 +140,7 @@ end
 
 function TSQ:offset(value)
 	if type(value) ~= "number" then
-		-- FIXME do what? return nil? or a special 'failing' object?
-		return nil
+		error("offset ("..value..") is not a number")
 	end
 	self._offset = value
 	return self
@@ -151,8 +148,7 @@ end
 
 function TSQ:soffset(value)
 	if type(value) ~= "number" then
-		-- FIXME do what? return nil? or a special 'failing' object?
-		return nil
+		error("soffset ("..value..") is not a number")
 	end
 	self._soffset = value
 	return self
@@ -254,10 +250,10 @@ end
 
 function TSQ.packageExpr(a, op, b)
 	if a == nil or b == nil or op == nil then
-		return nil
+		error("no nils allowed (" .. a .. ', ' .. op .. ', ' .. b ..")")
 	end
 	if not TSQ.is_an_op(op) then
-		return nil
+		error("operation (" .. op .. ") is not valid")
 	end
 	
 	-- FIXME quoting.
