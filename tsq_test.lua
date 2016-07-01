@@ -146,6 +146,14 @@ describe("Query generation", function()
 		q = TSQ.q():where_field_isnot('bob', 'twelve')
 		assert.are.equal([[SELECT * FROM * WHERE bob != 'twelve']], tostring(q))
 
+		-- shoudl greater and less be tested for strings?
+
+		q = TSQ.q():where_field_is('d', 9):AND_field_isnot('h', 12)
+		assert.are.equal([[SELECT * FROM * WHERE d = 9 AND h != 12]], tostring(q))
+
+		q = TSQ.q():where_field_is('d', 9):OR_field_isnot('h', 12)
+		assert.are.equal([[SELECT * FROM * WHERE ( d = 9 OR h != 12 )]], tostring(q))
+
 	end)
 
 	--------------------------------------------------------------
