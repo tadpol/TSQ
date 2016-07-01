@@ -398,6 +398,33 @@ function tsq_result_i(result)
 end
 
 ---
+-- Return the next values in the series returned from Timeseries.
+-- This works much like Lua's next() function.
+function TSQ.next_in_series(serieses, idx)
+	if idx == nil then idx = 1 else idx = idx + 1 end
+	local result = {}
+	local has_values = 0
+	for i,series in ipairs(serieses) do
+		local value = series.values[idx]
+		local ret = {}
+		if value ~= nil then
+			has_values = has_values + 1
+			for i,v in ipairs(series.columns) do
+				ret[v] = value[i]
+			end
+		end
+		result[#result + 1] = ret
+	end
+
+	-- if all of the series are empty, then stop.
+	if has_values == 0 then
+		return nil
+	else
+		return idx, table.unpack(result)
+	end
+end
+
+---
 -- Dump a table as a string; recursively
 -- \returns string
 function dump_table(o)
