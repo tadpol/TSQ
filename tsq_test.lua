@@ -126,6 +126,28 @@ describe("Query generation", function()
 
 	end)
 
+	it("checks field where clauses", function()
+		local q
+		q = TSQ.q():where_field_is('bob', 12)
+		assert.are.equal([[SELECT * FROM * WHERE bob = 12]], tostring(q))
+
+		q = TSQ.q():where_field_isnot('bob', 12)
+		assert.are.equal([[SELECT * FROM * WHERE bob != 12]], tostring(q))
+
+		q = TSQ.q():where_field_greater('bob', 12)
+		assert.are.equal([[SELECT * FROM * WHERE bob > 12]], tostring(q))
+
+		q = TSQ.q():where_field_less('bob', 12)
+		assert.are.equal([[SELECT * FROM * WHERE bob < 12]], tostring(q))
+
+		q = TSQ.q():where_field_is('bob', 'twelve')
+		assert.are.equal([[SELECT * FROM * WHERE bob = 'twelve']], tostring(q))
+
+		q = TSQ.q():where_field_isnot('bob', 'twelve')
+		assert.are.equal([[SELECT * FROM * WHERE bob != 'twelve']], tostring(q))
+
+	end)
+
 	--------------------------------------------------------------
 	it("parts can be added across multiple lines.", function()
 		local q = TSQ.q()
