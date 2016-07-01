@@ -239,7 +239,8 @@ function TSQ:fill(opt)
 end
 
 function TSQ.is_an_op(op)
-	local binary_op = {"+", "-", "*", "/", "AND", "OR", "=", "!=", "<>", "<", "<=", ">", ">="}
+	--local binary_op = {"+", "-", "*", "/", "AND", "OR", "=", "!=", "<>", "<", "<=", ">", ">="}
+	local binary_op = {"=", "!=", "<>", "<", "<=", ">", ">=", "=~", "!~"}
 	for i,v in ipairs(binary_op) do
 		if v == op then
 			return true
