@@ -332,16 +332,28 @@ end
 -- Specific where clauses for fields.
 for i,v in ipairs{'where','AND','OR'} do
 	TSQ[v .. "_field_is"] = function(me, field, value)
-		return me[v](me, field, '=', tostring(value))
+		if type(value) ~= "number" then
+			value = "'" .. tostring(value) .. "'"
+		end
+		return me[v](me, field, '=', value)
 	end
 	TSQ[v .. "_field_isnot"] = function(me, field, value)
-		return me[v](me, field, '!=', tostring(value))
+		if type(value) ~= "number" then
+			value = "'" .. tostring(value) .. "'"
+		end
+		return me[v](me, field, '!=', value)
 	end
 	TSQ[v .. "_field_greater"] = function(me, field, value)
-		return me[v](me, field, '>', tostring(value))
+		if type(value) ~= "number" then
+			value = "'" .. tostring(value) .. "'"
+		end
+		return me[v](me, field, '>', value)
 	end
 	TSQ[v .. "_field_less"] = function(me, field, value)
-		return me[v](me, field, '<', tostring(value))
+		if type(value) ~= "number" then
+			value = "'" .. tostring(value) .. "'"
+		end
+		return me[v](me, field, '<', value)
 	end
 end
 
