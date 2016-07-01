@@ -400,6 +400,11 @@ end
 ---
 -- Return the next values in the series returned from Timeseries.
 -- This works much like Lua's next() function.
+-- If there are multiple series, then the next for each is returned
+--
+-- This returns the next index or nil if at the end.
+-- Following are tables for each series where the keys are the column names and the
+-- values are from the current row.
 function TSQ.next_in_series(serieses, idx)
 	if idx == nil then idx = 1 else idx = idx + 1 end
 	local result = {}
