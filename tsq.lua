@@ -426,6 +426,40 @@ function TSQ.is_a_date(date)
 	return pcall(TSQ.validate_date, date)
 end
 
+-- Specific where clauses for times.
+for i,v in ipairs{'where','AND','OR'} do
+	TSQ[v .. "_time_after"] = function(me, time)
+		time = tostring(time)
+		if not TSQ.is_a_duration(time) then
+			TSQ.validate_date(time)
+			time = "'" .. time .. "'"
+		end
+		return me[v](me, 'time', '>', time)
+	end
+	TSQ[v .. "_time_before"] = function(me, time)
+		time = tostring(time)
+		if not TSQ.is_a_duration(time) then
+			TSQ.validate_date(time)
+			time = "'" .. time .. "'"
+		end
+		return me[v](me, 'time', '<', time)
+	end
+	TSQ[v .. "_time_ago"] = function(me, time)
+		time = tostring(time)
+		if not TSQ.is_a_duration(time) then
+			error("Not a duration (" .. time .. ")")
+		end
+		return me[v](me, 'time', '>', "now() - " .. time)
+	end
+	TSQ[v .. "_time_since"] = function(me, time)
+		time = tostring(time)
+		if not TSQ.is_a_duration(time) then
+			error("Not a duration (" .. time .. ")")
+		end
+		return me[v](me, 'time', '<', "now() + " .. time)
+	end
+end
+
 function TSQ:__tostring()
 	local s = 'SELECT '
 	s = s .. tostring(self._sel)
