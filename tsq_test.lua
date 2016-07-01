@@ -104,6 +104,23 @@ describe("Query generation", function()
 
 	end)
 
+	it("checks where tag clauses", function()
+		local q
+		q = TSQ.q():where_tag_is('sn', 5)
+		assert.are.equal([[SELECT * FROM * WHERE sn = '5']], tostring(q))
+
+		q = TSQ.q():where_tag_isnot('sn', 5)
+		assert.are.equal([[SELECT * FROM * WHERE sn != '5']], tostring(q))
+
+		q = TSQ.q():where_tag_matches('sn', "[1234567890]+")
+		assert.are.equal([[SELECT * FROM * WHERE sn =~ /[1234567890]+/]], tostring(q))
+
+		q = TSQ.q():where_tag_not_matching('sn', "[1234567890]+")
+		assert.are.equal([[SELECT * FROM * WHERE sn !~ /[1234567890]+/]], tostring(q))
+
+
+	end)
+
 	--------------------------------------------------------------
 	it("parts can be added across multiple lines.", function()
 		local q = TSQ.q()

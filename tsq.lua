@@ -310,15 +310,7 @@ function TSQ:OR(a, op, b)
 end
 
 --[[
--- q:where_tag_is(tag,value)
--- q:where_tag_isnot(tag,value)
--- q:where_tag_regexp(tag, pat)
--- q:AND_tag...
--- q:OR_tag...
---
---
 -- q:where_time...
--- q:where_field...
 --]]
 
 -- Specific where clauses for tags.
