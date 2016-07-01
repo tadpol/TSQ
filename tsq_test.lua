@@ -119,6 +119,15 @@ describe("Query generation", function()
 		r = [[SELECT MEAN("temp") FROM "wintd" WHERE ( sn = '3' OR sn = '5' ) AND time > now() - 1h GROUP BY "sn",time( 15m ) fill(previous) LIMIT 1]]
 		assert.are.equal(r, tostring(s))
 	end)
+	it("a complex one for a real query 2", function()
+		local q
+		q = TSQ.q():fields('MEAN(temp)'):from('wintd')
+		q:where_tag_is('sn', 3):OR_tag_is('sn', 5)
+		q:AND('time','>','now() - 1h')
+		q:groupby('sn'):groupbytime('15m'):fill('prev'):limit(1)
+		r = [[SELECT MEAN("temp") FROM "wintd" WHERE ( sn = '3' OR sn = '5' ) AND time > now() - 1h GROUP BY "sn",time( 15m ) fill(previous) LIMIT 1]]
+		assert.are.equal(r, tostring(q))
+	end)
 
 	it("another real query to test.", function()
 		local sn = 5
