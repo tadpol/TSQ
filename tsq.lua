@@ -308,6 +308,50 @@ function TSQ:OR(a, op, b)
 	return self
 end
 
+--[[
+-- q:where_tag_is(tag,value)
+-- q:where_tag_isnot(tag,value)
+-- q:where_tag_regexp(tag, pat)
+-- q:AND_tag...
+-- q:OR_tag...
+--
+--
+-- q:where_time...
+-- q:where_field...
+--]]
+
+-- Specific where clauses for tags.
+for i,v in ipairs{'where','AND','OR'} do
+	TSQ[v .. "_tag_is"] = function(me, tag, value)
+		return me[v](me, tag, '=', "'" .. tostring(value) .. "'")
+	end
+	TSQ[v .. "_tag_isnot"] = function(me, tag, value)
+		return me[v](me, tag, '!=', "'" .. tostring(value) .. "'")
+	end
+	TSQ[v .. "_tag_matches"] = function(me, tag, value)
+		return me[v](me, tag, '=~', "/" .. tostring(value) .. "/")
+	end
+	TSQ[v .. "_tag_not_matching"] = function(me, tag, value)
+		return me[v](me, tag, '!~', "/" .. tostring(value) .. "/")
+	end
+end
+
+-- Specific where clauses for fields.
+for i,v in ipairs{'where','AND','OR'} do
+	TSQ[v .. "_field_is"] = function(me, field, value)
+		return me[v](me, field, '=', tostring(value))
+	end
+	TSQ[v .. "_field_isnot"] = function(me, field, value)
+		return me[v](me, field, '!=', tostring(value))
+	end
+	TSQ[v .. "_field_greater"] = function(me, field, value)
+		return me[v](me, field, '>', tostring(value))
+	end
+	TSQ[v .. "_field_less"] = function(me, field, value)
+		return me[v](me, field, '<', tostring(value))
+	end
+end
+
 function TSQ:__tostring()
 	local s = 'SELECT '
 	s = s .. tostring(self._sel)
