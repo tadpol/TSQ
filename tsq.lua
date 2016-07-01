@@ -357,6 +357,75 @@ for i,v in ipairs{'where','AND','OR'} do
 	end
 end
 
+function TSQ.validate_date(date)
+	-- Specify time with date time strings. Date time strings can take two formats:
+	-- YYYY-MM-DD HH:MM:SS.nnnnnnnnn and YYYY-MM-DDTHH:MM:SS.nnnnnnnnnZ, where the
+	-- second specification is RFC3339. Nanoseconds (nnnnnnnnn) are optional in
+	-- both formats.
+
+	-- It appeasr that the entire time portion is also optional.
+	
+	-- Patterns in Lua are a bit limited, So we need to break down the string and
+	-- work with the parts.
+	
+	local ts = {}
+	ts.year, ts.month, ts.day = string.match(date, "^(%d%d%d%d)%-(%d%d)%-(%d%d)")
+
+		-- only the year-month-day, so stop.
+	if #date > 10 then
+		tchar = string.sub(date, 11, 11)
+		if tchar ~= 'T' and tchar ~= ' ' then
+			error("Invalid date, missing time seperator. ("..date..")")
+		end
+
+		ts.hour, ts.minute, ts.second = string.match(date, "(%d%d):(%d%d):(%d%d)", 12)
+
+		ts.nano = string.match(date, "%.(%d+)", 20)
+		if ts.nano == nil then ts.nano = 0 end 
+
+		if tchar == 'T' and string.sub(date, -1, -1) ~= 'Z' then
+			error("Invalid date, RFC3339 style missing final Z. ("..date..")")
+		end
+	else
+		ts.hour, ts.minute, ts.second, ts.nano = 0,0,0,0
+	end
+
+	-- Make them all numbers.
+	for k,v in pairs(ts) do
+		ts[k] = tonumber(v)
+	end
+
+	-- Now check that numbera are valid.
+	if ts.month > 12 then
+		error("Month (" .. ts.month .. ") out of range")
+	end
+	local daysinmonth = {31,28,31,30,31,30,31,31,30,31,30,31}
+	local daylimit = daysinmonth[ts.month]
+	if ts.month == 2 then
+		-- is leap?
+		-- missing the ts.year % 400 check. are you using this in 2416?
+		if ts.year % 4 == 0 and not ts.year % 100 == 0 then
+			daylimit = 29
+		end
+	elseif ts.day > daylimit then
+		error("Month (" .. ts.month .. ") has too many days (" .. ts.day .. " > " .. daylimit .. ")")
+	end
+	if ts.hour > 23 then
+		error("Too many hours (".. ts.hour .. ")")
+	end
+	if ts.minute > 59 then
+		error("Too many minutes (".. ts.hour .. ")")
+	end
+	if ts.second > 59 then
+		error("Too many seconds (".. ts.hour .. ")")
+	end
+	return true
+end
+
+function TSQ.is_a_date(date)
+	return pcall(TSQ.validate_date, date)
+end
+
 function TSQ:__tostring()
 	local s = 'SELECT '
 	s = s .. tostring(self._sel)
