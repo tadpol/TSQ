@@ -155,17 +155,20 @@ describe("Test the series results iterator", function()
 				{
 					columns={"time","mean"},
 					name = "wintd",
-					values={{14673141, 77.76}, {14673142, 90} }
+					values={{14673141, 77}, {14673142, 90} }
 				}
 			}
 		}
-		local limit = 3
-		for t in tsq_result_i(sr) do
-
+		local r = {}
+		local widx = 1
+		for i,t in TSQ.series_ipairs(sr.series) do
+			r[#r + 1] = t
 			-- make sure the iterator stops.
-			limit = limit - 1
-			assert.is_true( limit > 0 )
+			assert.are.equal(widx, i)
+			widx = widx + 1
 		end
+		local cmp = {{mean=77,time=14673141},{mean=90,time=14673142}}
+		assert.are.same(cmp, r)
 	end)
 end)
 
