@@ -156,6 +156,22 @@ describe("Query generation", function()
 
 	end)
 
+	it("checks time where clauses.", function()
+		local q
+		q = TSQ.q():where_time_after('2d')
+		assert.are.equal([[SELECT * FROM * WHERE time > 2d]], tostring(q))
+
+		q = TSQ.q():where_time_before('2d')
+		assert.are.equal([[SELECT * FROM * WHERE time < 2d]], tostring(q))
+
+		q = TSQ.q():where_time_ago('2d')
+		assert.are.equal([[SELECT * FROM * WHERE time > now() - 2d]], tostring(q))
+
+		q = TSQ.q():where_time_since('2d')
+		assert.are.equal([[SELECT * FROM * WHERE time < now() + 2d]], tostring(q))
+
+	end)
+
 	--------------------------------------------------------------
 	it("parts can be added across multiple lines.", function()
 		local q = TSQ.q()
