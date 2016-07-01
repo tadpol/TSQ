@@ -118,6 +118,11 @@ describe("Query generation", function()
 		q = TSQ.q():where_tag_not_matching('sn', "[1234567890]+")
 		assert.are.equal([[SELECT * FROM * WHERE sn !~ /[1234567890]+/]], tostring(q))
 
+		q = TSQ.q():where_tag_is('sn',5):OR_tag_is('sn', 7)
+		assert.are.equal([[SELECT * FROM * WHERE ( sn = '5' OR sn = '7' )]], tostring(q))
+
+		q = TSQ.q():where_tag_matches('sn', "."):AND_tag_is('sn', 12)
+		assert.are.equal([[SELECT * FROM * WHERE sn =~ /./ AND sn = '12']], tostring(q))
 
 	end)
 
