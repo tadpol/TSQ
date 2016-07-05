@@ -1,0 +1,9 @@
+language: lua
+before_install:
+    - sudo apt-get -qq update
+    - sudo apt-get install -y lua5.1 luarocks 
+    - lua -v
+    - luarocks --version
+    - sudo luarocks install busted
+script: "busted *_test.lua"
+
