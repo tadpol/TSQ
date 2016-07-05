@@ -102,7 +102,9 @@ describe("Query generation", function()
 		s = tostring(TSQ.q():groupbytime('13h'))
 		assert.are.equal([[SELECT * FROM * GROUP BY time( 13h )]], s)
 
-		-- TODO: more tests here.
+		s = tostring(TSQ.q():groupbytime('13h', '2d'))
+		assert.are.equal([[SELECT * FROM * GROUP BY time( 13h, 2d )]], s)
+
 	end)
 
 	it("checks where tag clauses", function()
