@@ -511,8 +511,43 @@ function TSQ:__tostring()
 	return s
 end
 
+---
+-- Inject parameters into a query.
+-- 
+-- This idea at the moment is doing string substitution after the query is built.
+-- Which means it might be completely defeting the protection stuff I tried to do
+-- previously.  So this might need to be rethought.
+function TSQ:__call(...)
+	local tbl = {}
+	if select('#', ...) == 0 then
+		return tostring(self)
+	elseif select('#', ...) == 1 then
+		local v = select(1, ...)
+		if type(v) == "table" then
+			tbl = v
+		else
+			tbl[1] = tostring(v)
+		end
+	else
+		tbl = table.pack(...)
+	end
+	--print(self)
+	local pst = tostring(self)
+	local rst = string.gsub(pst, "%|(%w+)%|", tbl)
+	local step = 0
+	rst = string.gsub(rst, "%?", function(m)
+		step = step + 1
+		return tbl[step]
+	end)
+	return rst
+end
+
 if _VERSION == "Lua 5.1" then
+	-- From https://github.com/keplerproject/lua-compat-5.2
 	table.unpack = unpack
+	table.pack = function(...)
+		return { n = select('#', ...), ... }
+	end
 end
 ------------------------------------------------------------------------------
 ---
