@@ -256,9 +256,9 @@ function TSQ.packageExpr(a, op, b)
 	if not TSQ.is_an_op(op) then
 		error("operation (" .. op .. ") is not valid")
 	end
-	
-	-- FIXME quoting.
 
+	-- quoting is handled somwhat by the callers
+	
 	return tostring(a) .. ' ' .. op .. ' ' .. tostring(b)
 end
 
@@ -316,10 +316,12 @@ end
 -- Specific where clauses for tags.
 for i,v in ipairs{'where','AND','OR'} do
 	TSQ[v .. "_tag_is"] = function(me, tag, value)
-		return me[v](me, tag, '=', "'" .. tostring(value) .. "'")
+		local s = string.gsub(tostring(value), "'", "\\'")
+		return me[v](me, tag, '=', "'" .. s .. "'")
 	end
 	TSQ[v .. "_tag_isnot"] = function(me, tag, value)
-		return me[v](me, tag, '!=', "'" .. tostring(value) .. "'")
+		local s = string.gsub(tostring(value), "'", "\\'")
+		return me[v](me, tag, '!=', "'" .. s .. "'")
 	end
 	TSQ[v .. "_tag_matches"] = function(me, tag, value)
 		return me[v](me, tag, '=~', "/" .. tostring(value) .. "/")
@@ -331,29 +333,14 @@ end
 
 -- Specific where clauses for fields.
 for i,v in ipairs{'where','AND','OR'} do
-	TSQ[v .. "_field_is"] = function(me, field, value)
-		if type(value) ~= "number" then
-			value = "'" .. tostring(value) .. "'"
+	for act,op in pairs{is='=', isnot='!=', greater='>', less='<'} do
+		TSQ[v .. "_field_" .. act] = function(me, field, value)
+			if type(value) ~= "number" then
+				local s = string.gsub(tostring(value), "'", "\\'")
+				value = "'" .. s .. "'"
+			end
+			return me[v](me, field, op, value)
 		end
-		return me[v](me, field, '=', value)
-	end
-	TSQ[v .. "_field_isnot"] = function(me, field, value)
-		if type(value) ~= "number" then
-			value = "'" .. tostring(value) .. "'"
-		end
-		return me[v](me, field, '!=', value)
-	end
-	TSQ[v .. "_field_greater"] = function(me, field, value)
-		if type(value) ~= "number" then
-			value = "'" .. tostring(value) .. "'"
-		end
-		return me[v](me, field, '>', value)
-	end
-	TSQ[v .. "_field_less"] = function(me, field, value)
-		if type(value) ~= "number" then
-			value = "'" .. tostring(value) .. "'"
-		end
-		return me[v](me, field, '<', value)
 	end
 end
 

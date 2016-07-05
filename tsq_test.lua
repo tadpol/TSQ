@@ -127,6 +127,12 @@ describe("Query generation", function()
 		q = TSQ.q():where_tag_matches('sn', "."):AND_tag_is('sn', 12)
 		assert.are.equal([[SELECT * FROM * WHERE sn =~ /./ AND sn = '12']], tostring(q))
 
+		q = TSQ.q():where_tag_is('sn', 'a string')
+		assert.are.equal([[SELECT * FROM * WHERE sn = 'a string']], tostring(q))
+
+		q = TSQ.q():where_tag_is('sn', "a 'string")
+		assert.are.equal([[SELECT * FROM * WHERE sn = 'a \'string']], tostring(q))
+
 	end)
 
 	it("checks field where clauses", function()
@@ -148,6 +154,9 @@ describe("Query generation", function()
 
 		q = TSQ.q():where_field_isnot('bob', 'twelve')
 		assert.are.equal([[SELECT * FROM * WHERE bob != 'twelve']], tostring(q))
+
+		q = TSQ.q():where_field_isnot('bob', "twe'l've")
+		assert.are.equal([[SELECT * FROM * WHERE bob != 'twe\'l\'ve']], tostring(q))
 
 		-- should greater and less be tested for strings?
 
