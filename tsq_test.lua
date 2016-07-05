@@ -102,6 +102,7 @@ describe("Query generation", function()
 		s = tostring(TSQ.q():groupbytime('13h'))
 		assert.are.equal([[SELECT * FROM * GROUP BY time( 13h )]], s)
 
+		-- TODO: more tests here.
 	end)
 
 	it("checks where tag clauses", function()
@@ -146,7 +147,7 @@ describe("Query generation", function()
 		q = TSQ.q():where_field_isnot('bob', 'twelve')
 		assert.are.equal([[SELECT * FROM * WHERE bob != 'twelve']], tostring(q))
 
-		-- shoudl greater and less be tested for strings?
+		-- should greater and less be tested for strings?
 
 		q = TSQ.q():where_field_is('d', 9):AND_field_isnot('h', 12)
 		assert.are.equal([[SELECT * FROM * WHERE d = 9 AND h != 12]], tostring(q))
