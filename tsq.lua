@@ -512,7 +512,11 @@ function TSQ:__tostring()
 end
 
 if _VERSION == "Lua 5.1" then
+	-- From https://github.com/keplerproject/lua-compat-5.2
 	table.unpack = unpack
+	table.pack = function(...)
+		return { n = select('#', ...), ... }
+	end
 end
 ------------------------------------------------------------------------------
 ---
