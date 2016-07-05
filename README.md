@@ -1,5 +1,7 @@
 #TSQ
 
+[![Build Status](https://travis-ci.org/tadpol/TSQ.svg?branch=master)](https://travis-ci.org/tadpol/TSQ)
+
 An abstraction to help with formatting pickiness and paramater validations.
 
 Built for the [Timeseries storage service](http://beta-docs.exosite.com/murano/services/timeseries/)
