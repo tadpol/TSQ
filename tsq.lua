@@ -73,7 +73,7 @@ function TSQ:fields(...)
 	end
 	for i,v in ipairs(tbl) do -- FIXME Needs to be smarter since can be expr.
 		-- func(field)
-		-- AS name
+		-- TODO: AS name
 		local vs = tostring(v)
 		fn, fl = string.match(vs, "^(%a+)%((.*)%)$") -- might be too simplistic.
 		if fn ~= nil and fl ~= nil then
@@ -111,6 +111,8 @@ function TSQ:from(...)
 	end
 	for i,v in ipairs(tbl) do
 		-- if quotes or / already surround string, don't add quotes.
+		-- It would be awesome to grab the bit inside and make sure it is correctly
+		-- escaped.
 		local vs = tostring(v)
 		if (vs:sub(1,1) == '"' and vs:sub(-1,-1) == '"') or
 			(vs:sub(1,1) == '/' and vs:sub(-1,-1) == '/') then
@@ -262,6 +264,7 @@ function TSQ.packageExpr(a, op, b)
 	return tostring(a) .. ' ' .. op .. ' ' .. tostring(b)
 end
 
+-- This has become more of an internal function.
 function TSQ:where(a, op, b)
 	local exr = self.packageExpr(a, op, b)
 	if type(self._where) ~= "table" then
@@ -281,8 +284,10 @@ function TSQ:where(a, op, b)
 	-- ANDs push to the end of where.
 	return self
 end
+-- This has become more of an internal function.
 TSQ.AND = TSQ.where
 
+-- This has become more of an internal function.
 function TSQ:OR(a, op, b)
 	local exr = self.packageExpr(a, op, b)
 	local ortbl = {}
@@ -309,9 +314,6 @@ function TSQ:OR(a, op, b)
 	return self
 end
 
---[[
--- q:where_time...
---]]
 
 -- Specific where clauses for tags.
 for i,v in ipairs{'where','AND','OR'} do
