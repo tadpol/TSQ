@@ -134,6 +134,17 @@ describe("Query generation", function()
 		assert.are.equal([[SELECT * FROM * WHERE sn = 'a \'string']], tostring(q))
 
 	end)
+	it("checks escaping on tags", function()
+		q = TSQ.q():where_tag_is('sfeq235gse5y', "a 'string")
+		assert.are.equal([[SELECT * FROM * WHERE sfeq235gse5y = 'a \'string']], tostring(q))
+
+		q = TSQ.q():where_tag_is("bob's", "a 'string")
+		assert.are.equal([[SELECT * FROM * WHERE "bob's" = 'a \'string']], tostring(q))
+
+		q = TSQ.q():where_tag_is("€", "a 'string")
+		assert.are.equal([[SELECT * FROM * WHERE "€" = 'a \'string']], tostring(q))
+
+	end)
 
 	it("checks field where clauses", function()
 		local q
