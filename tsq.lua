@@ -314,22 +314,31 @@ function TSQ:OR(a, op, b)
 	return self
 end
 
+function TSQ.escape_identifier(id)
+	if string.match(id, "^[A-Za-z_][A-Za-z_0-9]*$") == nil then
+		-- Need to escape it.
+		local vs = string.format('%q', tostring(id))
+		return vs
+	end
+	return id
+end
 
 -- Specific where clauses for tags.
 for i,v in ipairs{'where','AND','OR'} do
+	-- TODO: escape the tag string.
 	TSQ[v .. "_tag_is"] = function(me, tag, value)
 		local s = string.gsub(tostring(value), "'", "\\'")
-		return me[v](me, tag, '=', "'" .. s .. "'")
+		return me[v](me, me.escape_identifier(tag), '=', "'" .. s .. "'")
 	end
 	TSQ[v .. "_tag_isnot"] = function(me, tag, value)
 		local s = string.gsub(tostring(value), "'", "\\'")
-		return me[v](me, tag, '!=', "'" .. s .. "'")
+		return me[v](me, me.escape_identifier(tag), '!=', "'" .. s .. "'")
 	end
 	TSQ[v .. "_tag_matches"] = function(me, tag, value)
-		return me[v](me, tag, '=~', "/" .. tostring(value) .. "/")
+		return me[v](me, me.escape_identifier(tag), '=~', "/" .. tostring(value) .. "/")
 	end
 	TSQ[v .. "_tag_not_matching"] = function(me, tag, value)
-		return me[v](me, tag, '!~', "/" .. tostring(value) .. "/")
+		return me[v](me, me.escape_identifier(tag), '!~', "/" .. tostring(value) .. "/")
 	end
 end
 
@@ -341,7 +350,7 @@ for i,v in ipairs{'where','AND','OR'} do
 				local s = string.gsub(tostring(value), "'", "\\'")
 				value = "'" .. s .. "'"
 			end
-			return me[v](me, field, op, value)
+			return me[v](me, me.escape_identifier(field), op, value)
 		end
 	end
 end
