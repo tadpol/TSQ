@@ -17,12 +17,15 @@ end
 
 ---
 -- Build a InfluxDB write command from lua tables.
-function TSW.write(metric, tags, fields)
+function TSW.write(metric, tags, fields, timestamp)
 	local s = tostring(metric)
 	s = s .. ","
 	s = s .. TSW.table_to_idb(tags)
 	s = s .. " "
 	s = s .. TSW.table_to_idb(fields)
+	if timestamp ~= nil then
+		s = s .. " " .. timestamp
+	end
 	return s
 end
 
