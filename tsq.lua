@@ -107,6 +107,11 @@ function TSQ:fields(...)
 	return self
 end
 
+function TSQ:into(into)
+	-- TODO: what kind of checking/quoting goes here?
+	self._into = into
+end
+
 function TSQ:from(...)
 	if type(self._from) ~= "table" then
 		local ft = {}
@@ -344,7 +349,6 @@ end
 
 -- Specific where clauses for tags.
 for i,v in ipairs{'where','AND','OR'} do
-	-- TODO: escape the tag string.
 	TSQ[v .. "_tag_is"] = function(me, tag, value)
 		local s = string.gsub(tostring(value), "'", "\\'")
 		return me[v](me, me.escape_identifier(tag), '=', "'" .. s .. "'")
