@@ -50,6 +50,33 @@ function TSQ.q()
 	return ts
 end
 
+function TSQ.func_field_quoter(str)
+	local fn, pms = string.match(str, "^(%a+)(%b())$")
+	if fn == nil then
+		-- Not a function, check for quotes.
+		if string.sub(str, 1, 1) == '"' and string.sub(str, -1, -1) == '"' then
+			return str
+		else
+			return string.format('%q', str)
+		end
+	else
+		-- Is a function, check params and return
+		local prm = string.sub(pms, 2, -2) -- remove parens
+		-- If there is a second param, it is a number or duration.
+		-- Only the first param could be a function/tag/field.
+		local _, cidx = string.find(prm, ".*,") -- want the last comma
+		local rebuilt = ""
+		if cidx ~= nil then
+			rebuilt = TSQ.func_field_quoter(string.sub(prm, 1, cidx-1))
+			rebuilt = rebuilt .. string.sub(prm, cidx)
+		else
+			rebuilt = TSQ.func_field_quoter(prm)
+		end
+
+		return fn .. '(' .. rebuilt .. ')'
+	end
+end
+
 function TSQ:fields(...)
 	if type(self._sel) ~= "table" then
 		local ft = {}
@@ -74,15 +101,7 @@ function TSQ:fields(...)
 	for i,v in ipairs(tbl) do -- FIXME Needs to be smarter since can be expr.
 		-- func(field)
 		-- TODO: AS name
-		local vs = tostring(v)
-		fn, fl = string.match(vs, "^(%a+)%((.*)%)$") -- might be too simplistic.
-		if fn ~= nil and fl ~= nil then
-			-- this is a function call on a field. 
-			-- Quote the field only
-			vs = fn .. '("' .. fl .. '")'
-		else
-			vs =  '"' .. vs .. '"'
-		end
+		local vs = self.func_field_quoter(tostring(v))
 		self._sel[#self._sel + 1] = vs
 	end
 	return self

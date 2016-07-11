@@ -28,6 +28,15 @@ describe("Query generation", function()
 		assert.are.equal([[SELECT mean("af") FROM *]], s)
 	end)
 
+	it("checks for nested functions", function()
+		local s
+		s = tostring(TSQ.q():fields('DERIVATIVE(mean(af))'))
+		assert.are.equal([[SELECT DERIVATIVE(mean("af")) FROM *]], s)
+
+		s = tostring(TSQ.q():fields('DERIVATIVE(mean(af),6m)'))
+		assert.are.equal([[SELECT DERIVATIVE(mean("af"),6m) FROM *]], s)
+	end)
+
 	it("Check the ways metrics can be from", function()
 		local q
 		q = TSQ.q():from('af')
