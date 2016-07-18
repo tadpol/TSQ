@@ -1,5 +1,5 @@
 --[[
--- An abstraction to the InfluxDB Query language.  Specificly only SELECT statements.
+-- An abstraction to the InfluxDB Query language.  Specifically only SELECT statements.
 --
 -- InfluxDB is quiet picky about placement of spaces and quotes.  So this attempts
 -- to programically handle that by abstrating things a bit.  There will be some
