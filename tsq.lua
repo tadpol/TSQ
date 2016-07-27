@@ -369,7 +369,9 @@ end
 for i,v in ipairs{'where','AND','OR'} do
 	for act,op in pairs{is='=', isnot='!=', greater='>', less='<'} do
 		TSQ[v .. "_field_" .. act] = function(me, field, value)
-			if type(value) ~= "number" then
+			if type(value) == "boolean" then
+				value = tostring(value)
+			elseif type(value) ~= "number" then
 				local s = string.gsub(tostring(value), "'", "\\'")
 				value = "'" .. s .. "'"
 			end
