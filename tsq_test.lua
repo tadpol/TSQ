@@ -180,6 +180,20 @@ describe("Query generation", function()
 
 		-- should greater and less be tested for strings?
 
+		q = TSQ.q():where_field_is('bob', true)
+		assert.are.equal([[SELECT * FROM * WHERE bob = TRUE]], tostring(q))
+
+		q = TSQ.q():where_field_isnot('bob', true)
+		assert.are.equal([[SELECT * FROM * WHERE bob != TRUE]], tostring(q))
+
+		q = TSQ.q():where_field_is('bob', false)
+		assert.are.equal([[SELECT * FROM * WHERE bob = FALSE]], tostring(q))
+
+		q = TSQ.q():where_field_isnot('bob', false)
+		assert.are.equal([[SELECT * FROM * WHERE bob != FALSE]], tostring(q))
+
+		--
+
 		q = TSQ.q():where_field_is('d', 9):AND_field_isnot('h', 12)
 		assert.are.equal([[SELECT * FROM * WHERE d = 9 AND h != 12]], tostring(q))
 
