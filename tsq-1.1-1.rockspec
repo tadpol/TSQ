@@ -1,5 +1,5 @@
 package = "TSQ"
-version = "1.0-1"
+version = "1.1-1"
 source = {
    url = "https://github.com/tadpol/TSQ.git",
    tag = "v1.0"
