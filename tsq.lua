@@ -264,6 +264,36 @@ function TSQ:fill(opt)
 	return self
 end
 
+function TSQ:orderby(field, asc)
+	if type(self._orderby) ~= "table" then
+		local ft = {}
+		local ftm = {}
+		ftm.__tostring = function(v)
+			return table.concat(v, ',')
+		end
+		setmetatable(ft, ftm)
+		self._orderby = ft
+	end
+
+	local vs = string.format('%q', tostring(field))
+	if asc == nil then
+	elseif type(asc) == 'boolean' then
+		if asc then
+			vs = vs .. ' ASC'
+		else
+			vs = vs .. ' DESC'
+		end
+	else
+		if string.lower(tostring(asc)) == "asc" then
+			vs = vs .. ' ASC'
+		else
+			vs = vs .. ' DESC'
+		end
+	end
+	self._orderby[#self._orderby + 1] = vs
+	return self
+end
+
 function TSQ.is_an_op(op)
 	--local binary_op = {"+", "-", "*", "/", "AND", "OR", "=", "!=", "<>", "<", "<=", ">", ">="}
 	local binary_op = {"=", "!=", "<>", "<", "<=", ">", ">=", "=~", "!~"}

@@ -218,6 +218,25 @@ describe("Query generation", function()
 
 	end)
 
+	it("checks orderby clauses", function()
+		local q
+		q = TSQ.q():orderby('time')
+		assert.are.equal([[SELECT * FROM * ORDER BY "time"]], tostring(q))
+
+		q = TSQ.q():orderby('time', false)
+		assert.are.equal([[SELECT * FROM * ORDER BY "time" DESC]], tostring(q))
+
+		q = TSQ.q():orderby('time', 'desc')
+		assert.are.equal([[SELECT * FROM * ORDER BY "time" DESC]], tostring(q))
+
+		q = TSQ.q():orderby('time', true)
+		assert.are.equal([[SELECT * FROM * ORDER BY "time" ASC]], tostring(q))
+
+		q = TSQ.q():orderby('time', 'ASC')
+		assert.are.equal([[SELECT * FROM * ORDER BY "time" ASC]], tostring(q))
+
+	end)
+
 	--------------------------------------------------------------
 	it("parts can be added across multiple lines.", function()
 		local q = TSQ.q()
