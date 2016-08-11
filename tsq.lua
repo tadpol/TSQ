@@ -121,33 +121,18 @@ end
 TSF = {}
 TSF.__index = TSF
 function TSF.new(field)
-	setmetatable({_field = field},{
-		__tostring = function(v)
-			if type(v._func) == 'string' then
-				s = tostring(v._func) .. '(' .. string.format('%q', v._field) .. ')'
-			elseif type(v._func) == 'table' then
-				s = tostring(v._func[1]) .. '('
-				s = s .. string.format('%q', v._field) .. ', '
-				s = s .. tostring(v._func[2])
-				s = s .. ')'
-			else
-				s = string.format('%q', v._field)
-			end
-			if v._as ~= nil then
-				s = s .. ' AS ' .. string.format('%q', v._as)
-			end
-			return s
-		end
-	})
+	return setmetatable({_field = field},TSF)
 end
 function TSF:as(name)
 	self._as = name
+	return self
 end
 local select_single_functions = {'count', 'distinct', 'mean', 'median', 'spread',
 'sum', 'first', 'last', 'max', 'min', 'difference', 'stddev'}
 for i,v in ipairs(select_single_functions) do
 	TSF[v] = function(me)
 		me._func = string.upper(v)
+		return me
 	end
 end
 local select_number_functions = {'bottom', 'percentile', 'top', 'moving_average'}
@@ -157,6 +142,7 @@ for i,v in ipairs(select_number_functions) do
 			error("Param to '".. v .."' must be a number")
 		end
 		me._func = {string.upper(v), num}
+		return me
 	end
 end
 local select_duration_functions = {'derivative', 'elapsed', 'non_negative_derivative'}
@@ -166,7 +152,25 @@ for i,v in ipairs(select_duration_functions) do
 			error("Not a duration (" .. dur .. ")")
 		end
 		me._func = {string.upper(v), dur}
+		return me
 	end
+end
+function TSF:__tostring()
+	local s = ''
+	if type(self._func) == 'string' then
+		s = tostring(self._func) .. '(' .. string.format('%q', self._field) .. ')'
+	elseif type(self._func) == 'table' then
+		s = tostring(self._func[1]) .. '('
+		s = s .. string.format('%q', self._field) .. ', '
+		s = s .. tostring(self._func[2])
+		s = s .. ')'
+	else
+		s = string.format('%q', self._field)
+	end
+	if self._as ~= nil then
+		s = s .. ' AS ' .. string.format('%q', self._as)
+	end
+	return s
 end
 
 function TSQ:into(into)
