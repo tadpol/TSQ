@@ -12,7 +12,7 @@ in [Murano](https://exosite.com/platform/).
 ## Install
 
 You need to use either [`exosite`](http://docs.exosite.com/murano/exosite-cli/) or
-[MrMurano]()
+[MrMurano](https://github.com/tadpol/MrMurano)
 
 
 ### Using MrMurano
