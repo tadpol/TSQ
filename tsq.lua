@@ -91,7 +91,13 @@ function TSQ:fields(...)
 	if select('#', ...) == 1 then
 		local v = select(1, ...)
 		if type(v) == "table" then
-			tbl = v
+			if v._field ~= nil then
+				-- if this is a TSF object, store it in a table.
+				tbl = {v}
+			else
+				-- Otherwise it is an array of something.
+				tbl = v
+			end
 		else
 			tbl[1] = tostring(v)
 		end
@@ -99,12 +105,68 @@ function TSQ:fields(...)
 		tbl = table.pack(...)
 	end
 	for i,v in ipairs(tbl) do -- FIXME Needs to be smarter since can be expr.
-		-- func(field)
-		-- TODO: AS name
-		local vs = self.func_field_quoter(tostring(v))
+		local vs = ''
+		if v._field ~= nil then
+			-- This is a TSF object.
+			vs = v
+		else
+			-- This is might be just a field name, or an old formatted func-field
+			vs = self.func_field_quoter(tostring(v))
+		end
 		self._sel[#self._sel + 1] = vs
 	end
 	return self
+end
+
+TSF = {}
+TSF.__index = TSF
+function TSF.new(field)
+	setmetatable({_field = field},{
+		__tostring = function(v)
+			if type(v._func) == 'string' then
+				s = tostring(v._func) .. '(' .. string.format('%q', v._field) .. ')'
+			elseif type(v._func) == 'table' then
+				s = tostring(v._func[1]) .. '('
+				s = s .. string.format('%q', v._field) .. ', '
+				s = s .. tostring(v._func[2])
+				s = s .. ')'
+			else
+				s = string.format('%q', v._field)
+			end
+			if v._as ~= nil then
+				s = s .. ' AS ' .. string.format('%q', v._as)
+			end
+			return s
+		end
+	})
+end
+function TSF:as(name)
+	self._as = name
+end
+local select_single_functions = {'count', 'distinct', 'mean', 'median', 'spread',
+'sum', 'first', 'last', 'max', 'min', 'difference', 'stddev'}
+for i,v in ipairs(select_single_functions) do
+	TSF[v] = function(me)
+		me._func = string.upper(v)
+	end
+end
+local select_number_functions = {'bottom', 'percentile', 'top', 'moving_average'}
+for i,v in ipairs(select_number_functions) do
+	TSF[v] = function(me, num)
+		if type(num) ~= 'number' then
+			error("Param to '".. v .."' must be a number")
+		end
+		me._func = {string.upper(v), num}
+	end
+end
+local select_duration_functions = {'derivative', 'elapsed', 'non_negative_derivative'}
+for i,v in ipairs(select_duration_functions) do
+	TSF[v] = function(me, dur)
+		if not TSQ.is_a_duration(dur) then
+			error("Not a duration (" .. dur .. ")")
+		end
+		me._func = {string.upper(v), dur}
+	end
 end
 
 function TSQ:into(into)
