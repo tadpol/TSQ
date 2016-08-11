@@ -1,6 +1,8 @@
 #TSQ
 
 [![Build Status](https://travis-ci.org/tadpol/TSQ.svg?branch=master)](https://travis-ci.org/tadpol/TSQ)
+![rock version](https://img.shields.io/badge/rock%20version-1.2--1-brightgreen.svg)
+
 
 An abstraction to help with formatting pickiness and paramater validations.
 
@@ -9,7 +11,23 @@ in [Murano](https://exosite.com/platform/).
 
 ## Install
 
-- You need to use the [`exosite`](http://beta-docs.exosite.com/murano/exosite-cli/) command line tool to upload modules.
+You need to use either [`exosite`](http://docs.exosite.com/murano/exosite-cli/) or
+[MrMurano]()
+
+
+### Using MrMurano
+Clone or add as a submodule into the modules directory.
+```
+cd modules
+git clone https://github.com/tadpol/TSQ 
+```
+OR
+```
+cd modules
+git submodule add https://github.com/tadpol/TSQ
+```
+
+### Using exosite
 - Edit `Solutionfile.json` to add `tsq.lua`
   ```json
 	...
