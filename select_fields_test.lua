@@ -104,4 +104,5 @@ describe("Select Fields with Functions", function()
 
 	end)
 end)
+
 -- vim: set ai sw=2 ts=2 :
