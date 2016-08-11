@@ -20,6 +20,13 @@ describe("Query generation", function()
 
 		s = tostring(TSQ.q():fields{'af', 'gf', 'gh'})
 		assert.are.equal([[SELECT "af","gf","gh" FROM *]], s)
+
+		local q
+		q = TSQ.q():fields('af')
+		q:fields('gf')
+		q:fields('gh')
+		s = tostring(q)
+		assert.are.equal([[SELECT "af","gf","gh" FROM *]], s)
 	end)
 
 	it("checks that functions on fields", function()
