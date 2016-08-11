@@ -82,7 +82,11 @@ function TSQ:fields(...)
 		local ft = {}
 		local ftm = {}
 		ftm.__tostring = function(v)
-			return table.concat(v, ',')
+			local w = {}
+			for i,v in ipairs(v) do
+				w[#w + 1] = tostring(v)
+			end
+			return table.concat(w, ',')
 		end
 		setmetatable(ft, ftm)
 		self._sel = ft
