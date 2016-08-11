@@ -20,12 +20,73 @@ describe("Query generation", function()
 
 		s = tostring(TSQ.q():fields{'af', 'gf', 'gh'})
 		assert.are.equal([[SELECT "af","gf","gh" FROM *]], s)
+
+		local q
+		q = TSQ.q():fields('af')
+		q:fields('gf')
+		q:fields('gh')
+		s = tostring(q)
+		assert.are.equal([[SELECT "af","gf","gh" FROM *]], s)
 	end)
 
 	it("checks that functions on fields", function()
 		local s
 		s = tostring(TSQ.q():fields('mean(af)'))
 		assert.are.equal([[SELECT mean("af") FROM *]], s)
+	end)
+
+	it("checks fields from TSF", function()
+		local s, f, q
+		f = TSF.new('time')
+		q = TSQ.q():fields(f)
+		s = tostring(q)
+		assert.are.equal([[SELECT "time" FROM *]], s)
+
+		f = TSF.new('time'):count()
+		q = TSQ.q():fields(f)
+		s = tostring(q)
+		assert.are.equal([[SELECT COUNT("time") FROM *]], s)
+
+		f = TSF.new('time'):top(5)
+		q = TSQ.q():fields(f)
+		s = tostring(q)
+		assert.are.equal([[SELECT TOP("time", 5) FROM *]], s)
+
+		f = TSF.new('time'):as('bob')
+		q = TSQ.q():fields(f)
+		s = tostring(q)
+		assert.are.equal([[SELECT "time" AS "bob" FROM *]], s)
+
+	end)
+	it("checks multiple fields from TSF", function()
+		local s, q
+		q = TSQ.q():fields(TSF.new('time'), TSF.new('value'))
+		s = tostring(q)
+		assert.are.equal([[SELECT "time","value" FROM *]], s)
+
+		q = TSQ.q():fields(TSF.new('time'):min(), TSF.new('time'):max())
+		s = tostring(q)
+		assert.are.equal([[SELECT MIN("time"),MAX("time") FROM *]], s)
+
+		q = TSQ.q():fields(TSF.new('time'):as('fore'), TSF.new('value'):as('v'))
+		s = tostring(q)
+		assert.are.equal([[SELECT "time" AS "fore","value" AS "v" FROM *]], s)
+
+	end)
+	it("checks fields mixed with TSF", function()
+		local s, q
+		q = TSQ.q():fields(TSF.new('time'), 'value')
+		s = tostring(q)
+		assert.are.equal([[SELECT "time","value" FROM *]], s)
+
+		q = TSQ.q():fields(TSF.new('time'):as('g'), 'value')
+		s = tostring(q)
+		assert.are.equal([[SELECT "time" AS "g","value" FROM *]], s)
+
+		q = TSQ.q():fields('time', TSF.new('value'):mean())
+		s = tostring(q)
+		assert.are.equal([[SELECT "time",MEAN("value") FROM *]], s)
+
 	end)
 
 	it("checks for nested functions", function()
@@ -215,6 +276,25 @@ describe("Query generation", function()
 
 		q = TSQ.q():where_time_since('2d')
 		assert.are.equal([[SELECT * FROM * WHERE time < now() + 2d]], tostring(q))
+
+	end)
+
+	it("checks orderby clauses", function()
+		local q
+		q = TSQ.q():orderby('time')
+		assert.are.equal([[SELECT * FROM * ORDER BY "time"]], tostring(q))
+
+		q = TSQ.q():orderby('time', false)
+		assert.are.equal([[SELECT * FROM * ORDER BY "time" DESC]], tostring(q))
+
+		q = TSQ.q():orderby('time', 'desc')
+		assert.are.equal([[SELECT * FROM * ORDER BY "time" DESC]], tostring(q))
+
+		q = TSQ.q():orderby('time', true)
+		assert.are.equal([[SELECT * FROM * ORDER BY "time" ASC]], tostring(q))
+
+		q = TSQ.q():orderby('time', 'ASC')
+		assert.are.equal([[SELECT * FROM * ORDER BY "time" ASC]], tostring(q))
 
 	end)
 

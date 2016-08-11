@@ -82,7 +82,11 @@ function TSQ:fields(...)
 		local ft = {}
 		local ftm = {}
 		ftm.__tostring = function(v)
-			return table.concat(v, ',')
+			local w = {}
+			for i,v in ipairs(v) do
+				w[#w + 1] = tostring(v)
+			end
+			return table.concat(w, ',')
 		end
 		setmetatable(ft, ftm)
 		self._sel = ft
@@ -91,7 +95,13 @@ function TSQ:fields(...)
 	if select('#', ...) == 1 then
 		local v = select(1, ...)
 		if type(v) == "table" then
-			tbl = v
+			if v._field ~= nil then
+				-- if this is a TSF object, store it in a table.
+				tbl = {v}
+			else
+				-- Otherwise it is an array of something.
+				tbl = v
+			end
 		else
 			tbl[1] = tostring(v)
 		end
@@ -99,12 +109,72 @@ function TSQ:fields(...)
 		tbl = table.pack(...)
 	end
 	for i,v in ipairs(tbl) do -- FIXME Needs to be smarter since can be expr.
-		-- func(field)
-		-- TODO: AS name
-		local vs = self.func_field_quoter(tostring(v))
+		local vs = ''
+		if v._field ~= nil then
+			-- This is a TSF object.
+			vs = v
+		else
+			-- This is might be just a field name, or an old formatted func-field
+			vs = self.func_field_quoter(tostring(v))
+		end
 		self._sel[#self._sel + 1] = vs
 	end
 	return self
+end
+
+TSF = {}
+TSF.__index = TSF
+function TSF.new(field)
+	return setmetatable({_field = field},TSF)
+end
+function TSF:as(name)
+	self._as = name
+	return self
+end
+local select_single_functions = {'count', 'distinct', 'mean', 'median', 'spread',
+'sum', 'first', 'last', 'max', 'min', 'difference', 'stddev'}
+for i,v in ipairs(select_single_functions) do
+	TSF[v] = function(me)
+		me._func = string.upper(v)
+		return me
+	end
+end
+local select_number_functions = {'bottom', 'percentile', 'top', 'moving_average'}
+for i,v in ipairs(select_number_functions) do
+	TSF[v] = function(me, num)
+		if type(num) ~= 'number' then
+			error("Param to '".. v .."' must be a number")
+		end
+		me._func = {string.upper(v), num}
+		return me
+	end
+end
+local select_duration_functions = {'derivative', 'elapsed', 'non_negative_derivative'}
+for i,v in ipairs(select_duration_functions) do
+	TSF[v] = function(me, dur)
+		if not TSQ.is_a_duration(dur) then
+			error("Not a duration (" .. dur .. ")")
+		end
+		me._func = {string.upper(v), dur}
+		return me
+	end
+end
+function TSF:__tostring()
+	local s = ''
+	if type(self._func) == 'string' then
+		s = tostring(self._func) .. '(' .. string.format('%q', self._field) .. ')'
+	elseif type(self._func) == 'table' then
+		s = tostring(self._func[1]) .. '('
+		s = s .. string.format('%q', self._field) .. ', '
+		s = s .. tostring(self._func[2])
+		s = s .. ')'
+	else
+		s = string.format('%q', self._field)
+	end
+	if self._as ~= nil then
+		s = s .. ' AS ' .. string.format('%q', self._as)
+	end
+	return s
 end
 
 function TSQ:into(into)
@@ -261,6 +331,36 @@ function TSQ:fill(opt)
 	if self._groupby == nil then
 		self:groupby('*')
 	end
+	return self
+end
+
+function TSQ:orderby(field, asc)
+	if type(self._orderby) ~= "table" then
+		local ft = {}
+		local ftm = {}
+		ftm.__tostring = function(v)
+			return table.concat(v, ',')
+		end
+		setmetatable(ft, ftm)
+		self._orderby = ft
+	end
+
+	local vs = string.format('%q', tostring(field))
+	if asc == nil then
+	elseif type(asc) == 'boolean' then
+		if asc then
+			vs = vs .. ' ASC'
+		else
+			vs = vs .. ' DESC'
+		end
+	else
+		if string.lower(tostring(asc)) == "asc" then
+			vs = vs .. ' ASC'
+		else
+			vs = vs .. ' DESC'
+		end
+	end
+	self._orderby[#self._orderby + 1] = vs
 	return self
 end
 
