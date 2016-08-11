@@ -23,7 +23,8 @@ in [Murano](https://exosite.com/platform/).
 ## Example
 
 ```lua
-local qq = TSQ.q():fields('MEAN(temp)'):from('wintd')
+local qq = TSQ.q():fields(TSF.new('temp'):mean())
+qq:from('wintd')
 qq:where_tag_is('sn', 3):OR_tag_is('sn', 5)
 qq:AND_time_ago('1h')
 qq:groupby('sn'):groupbytime('15m'):fill('prev'):limit(1)
