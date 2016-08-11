@@ -161,15 +161,21 @@ for i,v in ipairs(select_duration_functions) do
 end
 function TSF:__tostring()
 	local s = ''
+	local fld = ''
+	if type(self._field) == 'table' then
+		fld = tostring(self._field)
+	else
+		fld = string.format('%q', self._field)
+	end
 	if type(self._func) == 'string' then
-		s = tostring(self._func) .. '(' .. string.format('%q', self._field) .. ')'
+		s = tostring(self._func) .. '(' .. fld .. ')'
 	elseif type(self._func) == 'table' then
 		s = tostring(self._func[1]) .. '('
-		s = s .. string.format('%q', self._field) .. ', '
+		s = s .. fld .. ', '
 		s = s .. tostring(self._func[2])
 		s = s .. ')'
 	else
-		s = string.format('%q', self._field)
+		s = fld
 	end
 	if self._as ~= nil then
 		s = s .. ' AS ' .. string.format('%q', self._as)
