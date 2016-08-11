@@ -1,7 +1,7 @@
 #TSQ
 
 [![Build Status](https://travis-ci.org/tadpol/TSQ.svg?branch=master)](https://travis-ci.org/tadpol/TSQ)
-![rock version](https://img.shields.io/badge/rock%20version-1.2--1-brightgreen.svg)
+![rock version](https://img.shields.io/badge/rock%20version-1.2--2-brightgreen.svg)
 
 
 An abstraction to help with formatting pickiness and paramater validations.
