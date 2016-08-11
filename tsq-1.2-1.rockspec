@@ -1,8 +1,8 @@
 package = "TSQ"
-version = "1.1-1"
+version = "1.2-1"
 source = {
    url = "https://github.com/tadpol/TSQ.git",
-   tag = "v1.0"
+   tag = "v1.2-1"
 }
 description = {
    summary = "Murano Timeseries (InfluxDB) Lua abstraction",
