@@ -15,6 +15,9 @@ TSQ = {}
 TSQ.__index = TSQ
 TSQ._sel = '*'
 TSQ._from = '*'
+setmetatable(TSQ, {__call=function()
+	return setmetatable({}, TSQ)
+end})
 
 --[[ Quoting Rules:
 -- https://docs.influxdata.com/influxdb/v0.13/troubleshooting/frequently_encountered_issues/#single-quoting-and-double-quoting-in-queries
@@ -44,10 +47,7 @@ TSQ._from = '*'
 --]]
 
 function TSQ.q()
-	local ts = {}
-	setmetatable(ts, TSQ)
-
-	return ts
+	return TSQ()
 end
 
 function TSQ.func_field_quoter(str)
