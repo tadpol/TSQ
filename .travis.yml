@@ -5,5 +5,8 @@ before_install:
     - lua -v
     - luarocks --version
     - sudo luarocks install busted
-script: "busted *_test.lua"
+    - sudo luarocks install luacheck
+script:
+    - luacheck tsq.lua tsw.lua
+    - "busted *_test.lua"
 
