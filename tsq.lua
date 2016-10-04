@@ -22,13 +22,13 @@ TSQ._from = '*'
 -- Single quote string values (for example, tag values) but do not single quote
 -- identifiers (database names, retention policy names, user names, measurement
 -- names, tag keys, and field keys).
--- 
+--
 -- Double quote identifiers if they start with a digit, contain characters
 -- other than [A-z,0-9,_], or if they are an InfluxQL keyword. You can double
 -- quote identifiers even if they don't fall into one of those categories but
 -- it isn't necessary.
--- 
--- Examples: 
+--
+-- Examples:
 -- 	Yes: SELECT bikes_available FROM bikes WHERE station_id='9'
 -- 	Yes: SELECT "bikes_available" FROM "bikes" WHERE "station_id"='9'
 -- 	Yes: SELECT * from "cr@zy" where "p^e"='2'
@@ -65,7 +65,7 @@ function TSQ.func_field_quoter(str)
 		-- If there is a second param, it is a number or duration.
 		-- Only the first param could be a function/tag/field.
 		local _, cidx = string.find(prm, ".*,") -- want the last comma
-		local rebuilt = ""
+		local rebuilt
 		if cidx ~= nil then
 			rebuilt = TSQ.func_field_quoter(string.sub(prm, 1, cidx-1))
 			rebuilt = rebuilt .. string.sub(prm, cidx)
@@ -81,9 +81,9 @@ function TSQ:fields(...)
 	if type(self._sel) ~= "table" then
 		local ft = {}
 		local ftm = {}
-		ftm.__tostring = function(v)
+		ftm.__tostring = function(val)
 			local w = {}
-			for i,v in ipairs(v) do
+			for _,v in ipairs(val) do
 				w[#w + 1] = tostring(v)
 			end
 			return table.concat(w, ',')
@@ -108,8 +108,8 @@ function TSQ:fields(...)
 	else
 		tbl = table.pack(...)
 	end
-	for i,v in ipairs(tbl) do -- FIXME Needs to be smarter since can be expr.
-		local vs = ''
+	for _,v in ipairs(tbl) do -- FIXME Needs to be smarter since can be expr.
+		local vs
 		if v._field ~= nil then
 			-- This is a TSF object.
 			vs = v
@@ -133,14 +133,14 @@ function TSF:as(name)
 end
 local select_single_functions = {'count', 'distinct', 'mean', 'median', 'spread',
 'sum', 'first', 'last', 'max', 'min', 'difference', 'stddev'}
-for i,v in ipairs(select_single_functions) do
+for _,v in ipairs(select_single_functions) do
 	TSF[v] = function(me)
 		me._func = string.upper(v)
 		return me
 	end
 end
 local select_number_functions = {'bottom', 'percentile', 'top', 'moving_average'}
-for i,v in ipairs(select_number_functions) do
+for _,v in ipairs(select_number_functions) do
 	TSF[v] = function(me, num)
 		if type(num) ~= 'number' then
 			error("Param to '".. v .."' must be a number")
@@ -150,7 +150,7 @@ for i,v in ipairs(select_number_functions) do
 	end
 end
 local select_duration_functions = {'derivative', 'elapsed', 'non_negative_derivative'}
-for i,v in ipairs(select_duration_functions) do
+for _,v in ipairs(select_duration_functions) do
 	TSF[v] = function(me, dur)
 		if not TSQ.is_a_duration(dur) then
 			error("Not a duration (" .. dur .. ")")
@@ -160,8 +160,8 @@ for i,v in ipairs(select_duration_functions) do
 	end
 end
 function TSF:__tostring()
-	local s = ''
-	local fld = ''
+	local s
+	local fld
 	if type(self._field) == 'table' then
 		fld = tostring(self._field)
 	else
@@ -209,14 +209,13 @@ function TSQ:from(...)
 	else
 		tbl = table.pack(...)
 	end
-	for i,v in ipairs(tbl) do
+	for _,v in ipairs(tbl) do
 		-- if quotes or / already surround string, don't add quotes.
 		-- It would be awesome to grab the bit inside and make sure it is correctly
 		-- escaped.
 		local vs = tostring(v)
-		if (vs:sub(1,1) == '"' and vs:sub(-1,-1) == '"') or
-			(vs:sub(1,1) == '/' and vs:sub(-1,-1) == '/') then
-		else
+		if not ( (vs:sub(1,1) == '"' and vs:sub(-1,-1) == '"') or
+			(vs:sub(1,1) == '/' and vs:sub(-1,-1) == '/') ) then
 			vs = string.format('%q', vs)
 		end
 		self._from[#self._from + 1] = vs
@@ -277,7 +276,7 @@ function TSQ:groupby(...)
 	else
 		tbl = table.pack(...)
 	end
-	for i,v in ipairs(tbl) do
+	for _,v in ipairs(tbl) do
 		local vs = string.format('%q', tostring(v))
 		self._groupby[#self._groupby + 1] = vs
 	end
@@ -291,7 +290,7 @@ function TSQ.is_a_duration(value)
 		return false
 	end
 	local allowed_units = {'u', 'ms', 's', 'm', 'h', 'd', 'w'}
-	for i,v in ipairs(allowed_units) do
+	for _,v in ipairs(allowed_units) do
 		if v == units then
 			return true
 		end
@@ -310,11 +309,13 @@ function TSQ:groupbytime(time, offset)
 	local gbtmeta = {}
 	gbtmeta.__tostring = function(v)
 		if #v <= 0 then return "" end
+		-- luacheck: push ignore 432/time
 		local time = "time( " .. tostring(v[1])
 		if #v > 1 then
 			time = time .. ", " .. tostring(v[2])
 		end
 		return time .. " )"
+		-- luacheck: pop
 	end
 	setmetatable(gbt, gbtmeta)
 	self._groupbytime = gbt
@@ -352,18 +353,19 @@ function TSQ:orderby(field, asc)
 	end
 
 	local vs = string.format('%q', tostring(field))
-	if asc == nil then
-	elseif type(asc) == 'boolean' then
-		if asc then
-			vs = vs .. ' ASC'
+	if asc ~= nil then
+		if type(asc) == 'boolean' then
+			if asc then
+				vs = vs .. ' ASC'
+			else
+				vs = vs .. ' DESC'
+			end
 		else
-			vs = vs .. ' DESC'
-		end
-	else
-		if string.lower(tostring(asc)) == "asc" then
-			vs = vs .. ' ASC'
-		else
-			vs = vs .. ' DESC'
+			if string.lower(tostring(asc)) == "asc" then
+				vs = vs .. ' ASC'
+			else
+				vs = vs .. ' DESC'
+			end
 		end
 	end
 	self._orderby[#self._orderby + 1] = vs
@@ -373,7 +375,7 @@ end
 function TSQ.is_an_op(op)
 	--local binary_op = {"+", "-", "*", "/", "AND", "OR", "=", "!=", "<>", "<", "<=", ">", ">="}
 	local binary_op = {"=", "!=", "<>", "<", "<=", ">", ">=", "=~", "!~"}
-	for i,v in ipairs(binary_op) do
+	for _,v in ipairs(binary_op) do
 		if v == op then
 			return true
 		end
@@ -390,7 +392,7 @@ function TSQ.packageExpr(a, op, b)
 	end
 
 	-- quoting is handled somwhat by the callers
-	
+
 	return tostring(a) .. ' ' .. op .. ' ' .. tostring(b)
 end
 
@@ -400,9 +402,9 @@ function TSQ:where(a, op, b)
 	if type(self._where) ~= "table" then
 		local andtbl = {}
 		local andmeta = {}
-		andmeta.__tostring = function(v)
+		andmeta.__tostring = function(val)
 			local w = {}
-			for i,v in ipairs(v) do
+			for _,v in ipairs(val) do
 				w[#w + 1] = tostring(v)
 			end
 			return table.concat(w, ' AND ')
@@ -424,9 +426,9 @@ function TSQ:OR(a, op, b)
 	if type(self._where[#self._where]) ~= "table" then
 		-- convert last item into a table
 		local ormeta = {}
-		ormeta.__tostring = function(v)
+		ormeta.__tostring = function(val)
 			local w = {}
-			for i,v in ipairs(v) do
+			for _,v in ipairs(val) do
 				w[#w + 1] = tostring(v)
 			end
 			return '( ' .. table.concat(w, ' OR ') .. ' )'
@@ -454,7 +456,7 @@ function TSQ.escape_identifier(id)
 end
 
 -- Specific where clauses for tags.
-for i,v in ipairs{'where','AND','OR'} do
+for _,v in ipairs{'where','AND','OR'} do
 	TSQ[v .. "_tag_is"] = function(me, tag, value)
 		local s = string.gsub(tostring(value), "'", "\\'")
 		return me[v](me, me.escape_identifier(tag), '=', "'" .. s .. "'")
@@ -472,7 +474,7 @@ for i,v in ipairs{'where','AND','OR'} do
 end
 
 -- Specific where clauses for fields.
-for i,v in ipairs{'where','AND','OR'} do
+for _,v in ipairs{'where','AND','OR'} do
 	for act,op in pairs{is='=', isnot='!=', greater='>', less='<'} do
 		TSQ[v .. "_field_" .. act] = function(me, field, value)
 			if type(value) == "boolean" then
@@ -493,16 +495,16 @@ function TSQ.validate_date(date)
 	-- both formats.
 
 	-- It appeasr that the entire time portion is also optional.
-	
+
 	-- Patterns in Lua are a bit limited, So we need to break down the string and
 	-- work with the parts.
-	
+
 	local ts = {}
 	ts.year, ts.month, ts.day = string.match(date, "^(%d%d%d%d)%-(%d%d)%-(%d%d)")
 
 		-- only the year-month-day, so stop.
 	if #date > 10 then
-		tchar = string.sub(date, 11, 11)
+		local tchar = string.sub(date, 11, 11)
 		if tchar ~= 'T' and tchar ~= ' ' then
 			error("Invalid date, missing time seperator. ("..date..")")
 		end
@@ -510,7 +512,7 @@ function TSQ.validate_date(date)
 		ts.hour, ts.minute, ts.second = string.match(date, "(%d%d):(%d%d):(%d%d)", 12)
 
 		ts.nano = string.match(date, "%.(%d+)", 20)
-		if ts.nano == nil then ts.nano = 0 end 
+		if ts.nano == nil then ts.nano = 0 end
 
 		if tchar == 'T' and string.sub(date, -1, -1) ~= 'Z' then
 			error("Invalid date, RFC3339 style missing final Z. ("..date..")")
@@ -536,7 +538,8 @@ function TSQ.validate_date(date)
 		if ts.year % 4 == 0 and not ts.year % 100 == 0 then
 			daylimit = 29
 		end
-	elseif ts.day > daylimit then
+	end
+	if ts.day > daylimit then
 		error("Month (" .. ts.month .. ") has too many days (" .. ts.day .. " > " .. daylimit .. ")")
 	end
 	if ts.hour > 23 then
@@ -556,7 +559,7 @@ function TSQ.is_a_date(date)
 end
 
 -- Specific where clauses for times.
-for i,v in ipairs{'where','AND','OR'} do
+for _,v in ipairs{'where','AND','OR'} do
 	TSQ[v .. "_time_after"] = function(me, time)
 		time = tostring(time)
 		if not me.is_a_duration(time) then
@@ -598,11 +601,11 @@ function TSQ:__tostring()
 	end
 
 	s = s .. ' FROM '.. tostring(self._from)
-	
+
 	if type(self._where) == "table" then
 		s = s .. ' WHERE ' .. tostring(self._where)
 	end
-	
+
 	if type(self._groupby) == "table" or type(self._groupbytime) == "table" then
 		local tags = {}
 		if type(self._groupby) == "table" then
@@ -642,10 +645,12 @@ end
 
 if _VERSION == "Lua 5.1" then
 	-- From https://github.com/keplerproject/lua-compat-5.2
+	-- luacheck: push ignore 122/table
 	table.unpack = unpack
 	table.pack = function(...)
 		return { n = select('#', ...), ... }
 	end
+	--luacheck: pop
 end
 ------------------------------------------------------------------------------
 ---
@@ -660,7 +665,7 @@ function TSQ.next_in_series(serieses, idx)
 	if idx == nil then idx = 1 else idx = idx + 1 end
 	local result = {}
 	local has_values = 0
-	for i,series in ipairs(serieses) do
+	for _,series in ipairs(serieses) do
 		local value = series.values[idx]
 		local ret = {}
 		if value ~= nil then
