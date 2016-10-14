@@ -1,3 +1,4 @@
+-- luacheck: globals describe it (busted globals)
 
 describe("Test the series results iterator", function()
 	require "tsq"

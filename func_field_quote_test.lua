@@ -1,3 +1,4 @@
+-- luacheck: globals describe it (busted globals)
 
 describe("Query generation", function()
 	require "tsq"

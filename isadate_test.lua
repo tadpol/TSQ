@@ -1,3 +1,4 @@
+-- luacheck: globals describe it (busted globals)
 
 
 describe("Test the is_a_date function.", function()

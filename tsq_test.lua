@@ -1,3 +1,4 @@
+-- luacheck: globals describe it (busted globals)
 
 describe("Query generation", function()
 	require "tsq"
@@ -205,7 +206,7 @@ describe("Query generation", function()
 
 	end)
 	it("checks escaping on tags", function()
-		q = TSQ.q():where_tag_is('sfeq235gse5y', "a 'string")
+		local q = TSQ.q():where_tag_is('sfeq235gse5y', "a 'string")
 		assert.are.equal([[SELECT * FROM * WHERE sfeq235gse5y = 'a \'string']], tostring(q))
 
 		q = TSQ.q():where_tag_is("bob's", "a 'string")
@@ -303,14 +304,14 @@ describe("Query generation", function()
 		local q = TSQ.q()
 		q:from("bob")
 		q:fields("a")
-		s = tostring(q)
+		local s = tostring(q)
 		assert.are.equal([[SELECT "a" FROM "bob"]], s)
 	end)
 
 	it("a complex one for a real query", function()
 		local s
 		s = TSQ.q():fields('MEAN(temp)'):from('wintd'):where_tag_is('sn',3):OR_tag_is('sn',5):AND_time_ago('1h'):groupby('sn'):groupbytime('15m'):fill('prev'):limit(1)
-		r = [[SELECT MEAN("temp") FROM "wintd" WHERE ( sn = '3' OR sn = '5' ) AND time > now() - 1h GROUP BY "sn",time( 15m ) fill(previous) LIMIT 1]]
+		local r = [[SELECT MEAN("temp") FROM "wintd" WHERE ( sn = '3' OR sn = '5' ) AND time > now() - 1h GROUP BY "sn",time( 15m ) fill(previous) LIMIT 1]]
 		assert.are.equal(r, tostring(s))
 	end)
 	it("a complex one for a real query 2", function()
@@ -319,7 +320,7 @@ describe("Query generation", function()
 		q:where_tag_is('sn', 3):OR_tag_is('sn', 5)
 		q:AND_time_ago('1h')
 		q:groupby('sn'):groupbytime('15m'):fill('prev'):limit(1)
-		r = [[SELECT MEAN("temp") FROM "wintd" WHERE ( sn = '3' OR sn = '5' ) AND time > now() - 1h GROUP BY "sn",time( 15m ) fill(previous) LIMIT 1]]
+		local r = [[SELECT MEAN("temp") FROM "wintd" WHERE ( sn = '3' OR sn = '5' ) AND time > now() - 1h GROUP BY "sn",time( 15m ) fill(previous) LIMIT 1]]
 		assert.are.equal(r, tostring(q))
 	end)
 

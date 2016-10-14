@@ -1,3 +1,5 @@
+-- luacheck: globals describe it (busted globals)
+
 describe("Select Fields with Functions", function()
 	require "tsq"
 
